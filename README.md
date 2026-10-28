@@ -1,41 +1,39 @@
-# Goal In One — Godot prototype V1
+# Goal In One — Godot V2
 
-A native Godot 4.6.3 / GDScript recreation of **level 14, Green runway**. Uses RigidBody2D, StaticBody2D, CollisionPolygon2D, Area2D and Camera2D; no embedded JavaScript game. Landscape 1280×720, Compatibility/WebGL2, single-threaded web export.
+Native Godot 4 / GDScript football puzzle prototype with a visual level-authoring foundation. Standard Godot **4.6.3** is tested and pinned in the web workflow; no .NET or application secrets are needed.
+
+**Start designing:** [Beginner Level Editor Guide](docs/LEVEL_EDITOR.md).
+
+1. Clone/download this repository and import `project.godot` in Godot.
+2. Choose the 2D workspace. Open `levels/green_runway.tscn` or `levels/timber_climb.tscn`.
+3. In the 2D toolbar choose **Goal In One → New level from template**.
+4. Drag reusable wood/ramp objects into the scene, edit their polygon vertices, move Spawn and Goal, and configure the root's scoring/camera properties.
+5. Save in `levels/`, press **F6** to test, and **F8** to return to editing. Ordinary level design needs no GDScript.
+
+The native editor supplies polygon editing, transforms, Inspector, undo and saving. The small enabled plugin adds New/Duplicate with unique IDs. Three editable scenes are included: original Green runway, Starter practice, and the larger two-axis Timber climb. Only the selected scene is instantiated at runtime. The browser build is for playing saved/exported levels, not authoring them.
 
 ## Play
 
-Drag backwards starting within 75 world pixels of the football, then release to kick. Kicks are unlimited, including during flight. Green arrows accelerate the ball right; bank off the timber roof and clear the ramp. Restart resets the attempt; Pause freezes play. Keyboard: R restart, Escape pause. Touch uses Godot's touch-to-mouse emulation (one aiming finger). Best score persists locally. Three stars for 1 shot, two for 2–3 shots, one otherwise.
+Drag backwards anywhere outside the HUD; release to kick. Unlimited kicks work in mid-flight. The dotted ball-sized trajectory preview includes approximate gravity/rebounds. Restart resets the attempt; Reset ball retains shots. Pause freezes play. Explore/Return (E) switches between camera dragging and aiming; wheel zoom works in Explore. R restarts, Escape pauses. Use the bottom-left picker to test any saved level. Touch uses single-finger mouse emulation in the selected mode. Pinch zoom is not implemented.
 
-## macOS editor and browser
-
-1. Install the **standard Godot 4.6.3** editor for macOS from the official Godot releases. Choose the build for Apple Silicon or Intel. No .NET SDK is needed.
-2. Clone this repository. In Godot Project Manager choose Import and select `project.godot`. Press F6/F5 or the Play button.
-3. For browser export, install matching templates via Editor → Manage Export Templates. Project → Export → Web → Export Project to `build/web/index.html` (create the directory first). Thread support is disabled in `export_presets.cfg`.
-4. Serve rather than double-clicking HTML: `python3 -m http.server 8000 --directory build/web`. Open `http://localhost:8000` on your Mac. WebGL2 is required. No cross-origin isolation headers are required for this single-threaded export.
-
-CLI (with `godot` on PATH):
+## Build and validate
 
 ```sh
 godot --headless --editor --import --quit
 godot --headless --script res://tests/runtime.gd
 mkdir -p build/web
 godot --headless --export-release Web build/web/index.html
+python3 -m http.server 8000 --directory build/web
 ```
 
-For restricted cloud tasks, set XDG_CACHE_HOME, XDG_DATA_HOME and XDG_CONFIG_HOME to writable directories before invoking Godot. Templates must be installed under the selected XDG_DATA_HOME. No application credentials are needed.
+Install matching export templates via Editor → Manage Export Templates before exporting. Open `http://localhost:8000` on your own machine, not the HTML file directly. Compatibility/WebGL2, single-threaded mode avoids cross-origin isolation requirements. For cloud execution set XDG_DATA_HOME, XDG_CONFIG_HOME and XDG_CACHE_HOME to writable directories; retained templates are under `/workspace/shared/godot-data` in this task.
 
-## GitHub Pages
+`.github/workflows/pages.yml` still imports, tests, exports and deploys pushes to `main`. GitHub Settings → Pages → Source must be **GitHub Actions**. Deployment target: https://charliegghaccount.github.io/godot-test-goal-in-one/ . Check the Actions deployment result for actual publication status.
 
-The included `.github/workflows/pages.yml` imports, runs the runtime checks, exports and deploys on pushes to `main` or manual dispatch. In GitHub **Settings → Pages → Source**, choose **GitHub Actions**. Ensure Actions are enabled and the `github-pages` environment allows `main`. After pushing, the deployment job reports the actual URL. No successful deployment or live URL is claimed until that job succeeds.
+## Scope and platform notes
 
-Expected URL after successful deployment: `https://charliegghaccount.github.io/godot-test-goal-in-one/`.
+[Architecture](docs/ARCHITECTURE.md) • [Validation](docs/VALIDATION.md) • [Migration comparison](docs/COMPARISON.md) • [Asset provenance](docs/ASSETS.md)
 
-If repository access is missing, preserve the local commit and restore the Codex GitHub connection's permission for this exact repository. An empty remote is supported; an initial commit is not required to push this project. The user selected godot-test-goal-in-one as the final destination; do not push into the original TypeScript game.
+This remains a technical prototype, not physics parity with Matter.js. The full campaign, all mechanics, world management and browser Level Studio are not recreated. Scoring uses stable level IDs; revisions need new IDs in this foundation. Physical iPhone/Android and Safari testing remain outstanding.
 
-## Native mobile path
-
-The project uses standard Godot nodes and assets without browser dependencies. Landscape is configured. For iPhone: install matching templates, add an iOS export preset, export on macOS, open the generated Xcode project, select your development team, bundle identifier and connected device, then build/run. This requires Apple's signing and Xcode toolchain. Android similarly needs the Godot Android template, supported JDK/SDK and an Android preset. Hardware touch, safe areas, interruptions, audio lifecycle, performance and save persistence need device testing before production. No App Store, advertising or monetisation integration is included.
-
-## Evidence and scope
-
-See [comparison](docs/COMPARISON.md), [validation](docs/VALIDATION.md) and [asset provenance](docs/ASSETS.md). The supplied browser build is an actual Godot export. Fixed arena framing matches this compact level; scrolling, Explore, pinch zoom, Level Studio and other levels are not implemented.
+For eventual iPhone testing: install matching native export templates, add an iOS export preset on macOS, export to Xcode, choose your Apple development team/bundle ID and run on a connected device. Android requires its supported JDK/SDK and an Android preset. No browser-only gameplay dependencies were introduced. Signing, hardware performance, safe areas and interruption handling still require platform validation.

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/timber.gd" id="1"]
+[node name="Ramp" type="Polygon2D"]
+polygon = PackedVector2Array(-120,40,120,-40,120,40)
+script = ExtResource("1")
+grass_edging = true

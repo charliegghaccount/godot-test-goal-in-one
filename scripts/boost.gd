@@ -1,3 +1,4 @@
+@tool
 extends Area2D
 var ball: RigidBody2D
 var active = false
@@ -14,7 +15,7 @@ func _ready():
 	queue_redraw()
 
 func _physics_process(dt):
-	if active:
+	if not Engine.is_editor_hint() and active and is_instance_valid(ball):
 		ball.sleeping = false
 		ball.linear_velocity.x += 7200 * maxf(0, 1 - ball.linear_velocity.x / 1080) * dt
 

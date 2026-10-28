@@ -1,0 +1,19 @@
+[gd_scene load_steps=6 format=3]
+[ext_resource type="Script" path="res://scripts/level.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/timber.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/goal.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/boost.tscn" id="4"]
+[ext_resource type="Script" path="res://scripts/spawn.gd" id="5"]
+[node name="Starter" type="Node2D"]
+script = ExtResource("1")
+level_id = "starter-template-v1"
+level_name = "Starter practice"
+[node name="Spawn" type="Marker2D" parent="."]
+script = ExtResource("5")
+position = Vector2(112,606.13632)
+[node name="Goal" parent="." instance=ExtResource("3")]
+position = Vector2(1091.0176,628.13632)
+
+[node name="Floor" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(50,628,1230,628,1230,658,50,658)
+grass_edging = true

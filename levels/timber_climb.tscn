@@ -1,0 +1,52 @@
+[gd_scene load_steps=6 format=3]
+[ext_resource type="Script" path="res://scripts/level.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/timber.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/goal.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/boost.tscn" id="4"]
+[ext_resource type="Script" path="res://scripts/spawn.gd" id="5"]
+[node name="TimberClimb" type="Node2D"]
+script = ExtResource("1")
+level_id = "grass-timber-climb-v1"
+level_name = "Timber climb"
+par = 3
+star_shots = Vector2i(3,5)
+level_size = Vector2(2100,1100)
+camera_mode = 1
+[node name="Spawn" type="Marker2D" parent="."]
+script = ExtResource("5")
+position = Vector2(150,975)
+[node name="Goal" parent="." instance=ExtResource("3")]
+position = Vector2(1830,580)
+goal_size = Vector2(180,145)
+
+[node name="Floor" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(50.0,1015.0,2050.0,1015.0,2050.0,985.0,50.0,985.0)
+grass_edging = true
+
+[node name="LeftWall" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(60.0,1000.0,60.0,120.0,40.0,120.0,40.0,1000.0)
+grass_edging = false
+
+[node name="Roof" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(50.0,130.0,2050.0,130.0,2050.0,110.0,50.0,110.0)
+grass_edging = false
+
+[node name="RightWall" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(2040.0,120.0,2040.0,1000.0,2060.0,1000.0,2060.0,120.0)
+grass_edging = false
+
+[node name="FirstRamp" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(400,1000,780,830,780,1000)
+grass_edging = true
+
+[node name="Shelf" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(900,790,1230,790,1230,820,900,820)
+grass_edging = true
+
+[node name="RaisedBank" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(1400,1000,1400,730,1750,580,2010,580,2010,1000)
+grass_edging = true
+
+[node name="CeilingBaffle" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(1080,120,1200,120,1200,400,1140,460,1080,400)
+grass_edging = false

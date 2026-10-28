@@ -17,3 +17,6 @@ common/physics_ticks_per_second=120
 2d/default_gravity=1100.0
 [input_devices]
 pointing/emulate_mouse_from_touch=true
+
+[editor_plugins]
+enabled=PackedStringArray("res://addons/level_studio/plugin.cfg")

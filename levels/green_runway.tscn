@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=3]
+[ext_resource type="Script" path="res://scripts/level.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/timber.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/goal.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/boost.tscn" id="4"]
+[ext_resource type="Script" path="res://scripts/spawn.gd" id="5"]
+[node name="GreenRunway" type="Node2D"]
+script = ExtResource("1")
+level_id = "grass-green-runway-v1"
+level_name = "Green runway"
+[node name="Spawn" type="Marker2D" parent="."]
+script = ExtResource("5")
+position = Vector2(112,606.13632)
+[node name="Goal" parent="." instance=ExtResource("3")]
+position = Vector2(1091.0176,628.13632)
+[node name="Boost" parent="." instance=ExtResource("4")]
+position = Vector2(352,618.13632)
+
+[node name="Boundary0" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(62.70864,628.13632,62.70864,409.12,52.30864,409.12,52.30864,628.13632)
+grass_edging = false
+
+[node name="Boundary1" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(61.19285498408295,412.78968117839395,167.68421498408296,305.87656117839396,160.31578501591704,298.53719882160607,53.82442501591705,405.45031882160606)
+grass_edging = false
+
+[node name="Boundary2" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(166.08000062926249,306.9727584481214,645.4880006292625,97.74187844812135,641.3279993707375,88.21012155187864,161.91999937073751,297.4410015518786)
+grass_edging = false
+
+[node name="Boundary3" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(639.8219445874779,96.74166150607316,1088.737304587478,524.2456615060731,1095.909415412522,516.7143384939269,646.9940554125221,89.21033849392684)
+grass_edging = false
+
+[node name="Floor" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(57.50864,633.33632,1226.51,633.33632,1226.51,622.9363199999999,57.50864,622.9363199999999)
+grass_edging = true
+
+[node name="Ramp" parent="." instance=ExtResource("2")]
+polygon = PackedVector2Array(564.0,628.0,756.0,509.6,756.0,628.0)
+grass_edging = true

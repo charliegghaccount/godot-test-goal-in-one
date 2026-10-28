@@ -1,6 +1,8 @@
 extends SceneTree
 var failures = 0
+var checks = 0
 func check(ok: bool, label: String):
+	checks += 1
 	if not ok:
 		failures += 1
 		push_error(label)
@@ -35,6 +37,59 @@ func run():
 	for i in range(30): await physics_frame
 	check(game.won,"physical goal entry completes level")
 	check(game.best > 0,"best score saved")
+	# Anywhere aiming, dead zone, screen pan separation.
+	game.won = false
+	var press = InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = Vector2(700,300)
+	game._unhandled_input(press)
+	check(game.aiming,"aim starts far from football")
+	var move = InputEventMouseMotion.new()
+	move.position = Vector2(600,350)
+	game._unhandled_input(move)
+	var release = press.duplicate()
+	release.pressed = false
+	var before_shots = game.shots
+	game._unhandled_input(release)
+	check(game.shots == before_shots+1,"anywhere release records kick")
+	game.toggle_explore()
+	game._unhandled_input(press)
+	game._unhandled_input(move)
+	game._unhandled_input(release)
+	check(not game.aiming and game.shots == before_shots+1,"explore drag never shoots")
+	game.toggle_explore()
+	var ids = []
+	for path in game.discover_levels():
+		var level = load(path).instantiate()
+		game.add_child(level)
+		check(not level.level_id in ids,"unique stable ID")
+		ids.append(level.level_id)
+		check(level.problems().is_empty(),"valid level: "+path)
+		for object in level.find_children("*", "Polygon2D",true,false):
+			check(object.polygon == object.collision.polygon,"visual/collision vertices: "+str(object.name))
+			check(object.global_transform == object.collision.global_transform,"visual/collision transforms: "+str(object.name))
+		level.get_node("Goal").goal_size = Vector2(220,180)
+		var g = level.get_node("Goal")
+		check(g.valid_crossing(Vector2(-20,-80),Vector2(40,-80)),"resized goal accepts forward crossing")
+		check(not g.valid_crossing(Vector2(40,-80),Vector2(-20,-80)),"goal rejects reverse crossing")
+		check(not g.valid_crossing(Vector2(-20,-2),Vector2(40,-2)),"goal rejects clipped crossing")
+		check(g.frame_body.get_child_count()==3,"goal has exactly three physical bars")
+		var packed = PackedScene.new()
+		check(packed.pack(level)==OK,"pack editable level")
+		check(ResourceSaver.save(packed,"user://roundtrip.tscn")==OK,"save editable level")
+		var reopened = load("user://roundtrip.tscn").instantiate()
+		check(reopened.level_id == level.level_id and reopened.get_node("Goal").goal_size==Vector2(220,180),"reopen retains identity and goal edits")
+		reopened.free()
+		level.queue_free()
+	# Validate transformed goal coordinates and both horizontal/vertical camera bounds.
+	game.goal.position = Vector2(900,500)
+	game.goal.rotation = 0.15
+	var world = game.goal.to_global(Vector2(40,-70))
+	check(game.goal.to_local(world).is_equal_approx(Vector2(40,-70)),"goal coordinates follow transform")
+	game.level.level_size = Vector2(2100,1100)
+	check(game.bounded_camera(Vector2(9999,9999)).x < 2100 and game.bounded_camera(Vector2(9999,9999)).y < 1100,"camera clamps both axes")
 	game.queue_free()
 	await process_frame
+	print("RESULT: %d checks, %d failures" % [checks,failures])
 	quit(1 if failures else 0)
