@@ -1,0 +1,57 @@
+[gd_scene load_steps=12 format=3]
+[ext_resource type="Script" path="res://scripts/level.gd" id="level"]
+[ext_resource type="PackedScene" path="res://scenes/timber.tscn" id="wood"]
+[ext_resource type="PackedScene" path="res://scenes/goal.tscn" id="goal"]
+[ext_resource type="PackedScene" path="res://scenes/spawn.tscn" id="spawn"]
+[ext_resource type="PackedScene" path="res://scenes/boost.tscn" id="boost"]
+[ext_resource type="PackedScene" path="res://scenes/backward_boost.tscn" id="backward_boost"]
+[ext_resource type="PackedScene" path="res://scenes/spring.tscn" id="spring"]
+[ext_resource type="PackedScene" path="res://scenes/fan.tscn" id="fan"]
+[ext_resource type="PackedScene" path="res://scenes/reset_pad.tscn" id="reset_pad"]
+[ext_resource type="PackedScene" path="res://scenes/pressure_switch.tscn" id="pressure_switch"]
+[ext_resource type="PackedScene" path="res://scenes/gate.tscn" id="gate"]
+[node name="Experiment" type="Node2D"]
+script = ExtResource("level")
+level_id = "experiment-switch_gate-v1"
+level_name = "Lab: Switch & gate"
+par = 3
+star_shots = Vector2i(3,6)
+[node name="Spawn" parent="." instance=ExtResource("spawn")]
+position = Vector2(150,606)
+[node name="Goal" parent="." instance=ExtResource("goal")]
+position = Vector2(1091,628)
+[node name="Floor" parent="." instance=ExtResource("wood")]
+polygon = PackedVector2Array(50,628,1230,628,1230,650,50,650)
+grass_edging = true
+[node name="LeftWall" parent="." instance=ExtResource("wood")]
+polygon = PackedVector2Array(40,180,60,180,60,628,40,628)
+[node name="Roof" parent="." instance=ExtResource("wood")]
+polygon = PackedVector2Array(40,170,1091,170,1091,190,40,190)
+[node name="RightWall" parent="." instance=ExtResource("wood")]
+polygon = PackedVector2Array(1080,190,1091,190,1091,520,1080,520)
+
+[node name="FloorSwitch" parent="." instance=ExtResource("pressure_switch")]
+position = Vector2(320,619)
+dimensions = Vector2(90,18)
+linked_gate = NodePath("../Gate")
+activation_mode = 1
+open_seconds = 6.0
+
+[node name="Gate" parent="." instance=ExtResource("gate")]
+position = Vector2(690,520)
+dimensions = Vector2(48,215)
+travel_distance = 245.0
+movement_speed = 170.0
+
+[node name="AutomaticGate" parent="." instance=ExtResource("gate")]
+position = Vector2(920,340)
+dimensions = Vector2(100,28)
+movement_direction = Vector2(1,0)
+travel_distance = 100.0
+movement_speed = 85.0
+automatic = true
+
+[node name="ForwardPad" parent="." instance=ExtResource("boost")]
+position = Vector2(470,617)
+dimensions = Vector2(130,22)
+acceleration = 2500.0

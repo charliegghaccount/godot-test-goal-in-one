@@ -60,10 +60,10 @@ func _ready():
 	goal = level.get_node("Goal")
 	goal.ball = ball
 	goal.scored.connect(complete)
-	for object in level.find_children("*", "Area2D", true, false):
-		if object.get_script() == preload("res://scripts/boost.gd"):
-			object.ball = ball
-			boost = object
+	for object in level.find_children("*", "Node2D", true, false):
+		if object.has_method("bind_game"):
+			object.bind_game(self)
+			if object.get_script() == preload("res://scripts/boost.gd"): boost = object
 	build_hud()
 	frame_camera()
 	refresh()
@@ -101,6 +101,8 @@ func reset_ball():
 		restart()
 		return
 	aiming = false
+	for object in level.find_children("*", "Area2D", true, false):
+		if object.has_method("reset_contact"): object.reset_contact()
 	PhysicsServer2D.body_set_state(ball.get_rid(),PhysicsServer2D.BODY_STATE_TRANSFORM,Transform2D(0,spawn_point))
 	ball.linear_velocity = Vector2.ZERO
 	ball.angular_velocity = 0
@@ -157,6 +159,9 @@ func build_hud():
 	row.add_child(explore_button)
 	level_picker = OptionButton.new()
 	level_picker.custom_minimum_size = Vector2(190,42)
+	level_picker.fit_to_longest_item = false
+	level_picker.clip_text = true
+	level_picker.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	level_picker.position = Vector2(24,660)
 	for path in level_paths:
 		level_picker.add_item(path.get_file().get_basename().capitalize())
@@ -209,6 +214,7 @@ Ready for another shot?"
 func complete():
 	if won or shots == 0: return
 	won = true
+	level.process_mode = Node.PROCESS_MODE_DISABLED
 	aiming = false
 	var stars = 3 if shots <= level.star_shots.x else (2 if shots <= level.star_shots.y else 1)
 	best = shots if best == 0 else mini(best,shots)
@@ -299,3 +305,35 @@ func _draw():
 		velocity.y += level.gravity * 0.025
 		velocity *= 0.99775
 		draw_circle(pos,2.8,Color(1,0.97,0.75,0.8*(1.0-float(i)/(count+2))))
+
+func mechanic_feedback(kind: String, at: Vector2):
+	var ring = Node2D.new()
+	ring.position = at
+	add_child(ring)
+	var circle = Line2D.new()
+	circle.width = 3
+	circle.default_color = Color("ff6b67") if kind == "reset" else Color("fff0a1")
+	for i in range(33): circle.add_point(Vector2.from_angle(i*TAU/32)*24)
+	ring.add_child(circle)
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(ring,"scale",Vector2(2,2),0.35)
+	tween.tween_property(ring,"modulate:a",0.0,0.35)
+	tween.chain().tween_callback(ring.queue_free)
+	var sound = AudioStreamPlayer.new()
+	var wav = AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = 22050
+	var data = PackedByteArray()
+	var duration = 0.16
+	var samples = int(duration*wav.mix_rate)
+	data.resize(samples*2)
+	for i in samples:
+		var t = float(i)/wav.mix_rate
+		var frequency = lerpf(440,150,t/duration) if kind == "reset" else lerpf(400,850,t/duration)
+		data.encode_s16(i*2,int(sin(TAU*frequency*t)*6000*(1.0-t/duration)))
+	wav.data = data
+	sound.stream = wav
+	sound.volume_db = -10
+	add_child(sound)
+	sound.finished.connect(sound.queue_free)
+	sound.play()

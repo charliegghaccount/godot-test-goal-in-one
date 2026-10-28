@@ -1,6 +1,8 @@
-# Goal In One — Godot V2
+# Goal In One — Godot V3
 
 Native Godot 4 / GDScript football puzzle prototype with a visual level-authoring foundation. Standard Godot **4.6.3** is tested and pinned in the web workflow; no .NET or application secrets are needed.
+
+**Interactive mechanics:** forward/backward boosts, reset strip, spring, directional fan, pressure switches and moving gates are reusable scenes with Inspector controls. Three editable experimental levels demonstrate their combinations. See [mechanic design notes](docs/MECHANICS.md).
 
 **Start designing:** [Beginner Level Editor Guide](docs/LEVEL_EDITOR.md).
 
@@ -10,7 +12,7 @@ Native Godot 4 / GDScript football puzzle prototype with a visual level-authorin
 4. Drag reusable wood/ramp objects into the scene, edit their polygon vertices, move Spawn and Goal, and configure the root's scoring/camera properties.
 5. Save in `levels/`, press **F6** to test, and **F8** to return to editing. Ordinary level design needs no GDScript.
 
-The native editor supplies polygon editing, transforms, Inspector, undo and saving. The small enabled plugin adds New/Duplicate with unique IDs. Three editable scenes are included: original Green runway, Starter practice, and the larger two-axis Timber climb. Only the selected scene is instantiated at runtime. The browser build is for playing saved/exported levels, not authoring them.
+The native editor supplies polygon editing, transforms, Inspector, undo and saving. The small enabled plugin adds New/Duplicate with unique IDs. The V2 sample scenes are preserved: original Green runway, Starter practice, and the larger two-axis Timber climb. Only the selected scene is instantiated at runtime. The browser build is for playing saved/exported levels, not authoring them.
 
 ## Play
 
@@ -21,6 +23,7 @@ Drag backwards anywhere outside the HUD; release to kick. Unlimited kicks work i
 ```sh
 godot --headless --editor --import --quit
 godot --headless --script res://tests/runtime.gd
+godot --headless --script res://tests/mechanics.gd
 mkdir -p build/web
 godot --headless --export-release Web build/web/index.html
 python3 -m http.server 8000 --directory build/web

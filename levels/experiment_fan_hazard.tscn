@@ -1,0 +1,52 @@
+[gd_scene load_steps=12 format=3]
+[ext_resource type="Script" path="res://scripts/level.gd" id="level"]
+[ext_resource type="PackedScene" path="res://scenes/timber.tscn" id="wood"]
+[ext_resource type="PackedScene" path="res://scenes/goal.tscn" id="goal"]
+[ext_resource type="PackedScene" path="res://scenes/spawn.tscn" id="spawn"]
+[ext_resource type="PackedScene" path="res://scenes/boost.tscn" id="boost"]
+[ext_resource type="PackedScene" path="res://scenes/backward_boost.tscn" id="backward_boost"]
+[ext_resource type="PackedScene" path="res://scenes/spring.tscn" id="spring"]
+[ext_resource type="PackedScene" path="res://scenes/fan.tscn" id="fan"]
+[ext_resource type="PackedScene" path="res://scenes/reset_pad.tscn" id="reset_pad"]
+[ext_resource type="PackedScene" path="res://scenes/pressure_switch.tscn" id="pressure_switch"]
+[ext_resource type="PackedScene" path="res://scenes/gate.tscn" id="gate"]
+[node name="Experiment" type="Node2D"]
+script = ExtResource("level")
+level_id = "experiment-fan_hazard-v1"
+level_name = "Lab: Air & hazard"
+par = 3
+star_shots = Vector2i(3,6)
+[node name="Spawn" parent="." instance=ExtResource("spawn")]
+position = Vector2(150,606)
+[node name="Goal" parent="." instance=ExtResource("goal")]
+position = Vector2(1091,628)
+[node name="Floor" parent="." instance=ExtResource("wood")]
+polygon = PackedVector2Array(50,628,1230,628,1230,650,50,650)
+grass_edging = true
+[node name="LeftWall" parent="." instance=ExtResource("wood")]
+polygon = PackedVector2Array(40,180,60,180,60,628,40,628)
+[node name="Roof" parent="." instance=ExtResource("wood")]
+polygon = PackedVector2Array(40,170,1091,170,1091,190,40,190)
+[node name="RightWall" parent="." instance=ExtResource("wood")]
+polygon = PackedVector2Array(1080,190,1091,190,1091,520,1080,520)
+
+[node name="Updraft" parent="." instance=ExtResource("fan")]
+position = Vector2(360,606)
+dimensions = Vector2(100,44)
+airflow_range = 340.0
+airflow_acceleration = 3300.0
+
+[node name="RedHazard" parent="." instance=ExtResource("reset_pad")]
+position = Vector2(590,617)
+dimensions = Vector2(240,22)
+
+[node name="AngledFan" parent="." instance=ExtResource("fan")]
+position = Vector2(820,605)
+rotation = 0.45
+airflow_range = 250.0
+airflow_acceleration = 2100.0
+
+[node name="Shelf" parent="." instance=ExtResource("wood")]
+position = Vector2(0,0)
+polygon = PackedVector2Array(640,400,850,400,850,420,640,420)
+grass_edging = true

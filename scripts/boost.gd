@@ -1,31 +1,34 @@
 @tool
-extends Area2D
-var ball: RigidBody2D
-var active = false
+extends "res://scripts/mechanics/area.gd"
+## Direction is in local coordinates (right by default). Acceleration uses px/s².
+@export var direction: Vector2 = Vector2.RIGHT:
+	set(value):
+		direction = value
+		queue_redraw()
+@export_range(0,20000,50) var acceleration: float = 7200.0
+@export_range(60,2500,10) var maximum_speed: float = 1080.0
+var phase = 0.0
 
 func _ready():
-	var collision = CollisionShape2D.new()
-	collision.shape = RectangleShape2D.new()
-	collision.shape.size = Vector2(184, 30)
-	add_child(collision)
-	body_entered.connect(func(body):
-		if body == ball: active = true)
-	body_exited.connect(func(body):
-		if body == ball: active = false)
-	queue_redraw()
+	super._ready()
 
 func _physics_process(dt):
-	if not Engine.is_editor_hint() and active and is_instance_valid(ball):
+	if Engine.is_editor_hint(): return
+	phase += dt
+	if active and is_instance_valid(ball):
+		var axis = direction.normalized().rotated(global_rotation)
+		var fade = maxf(0,1-maxf(0,ball.linear_velocity.dot(axis))/maximum_speed)
 		ball.sleeping = false
-		ball.linear_velocity.x += 7200 * maxf(0, 1 - ball.linear_velocity.x / 1080) * dt
+		ball.linear_velocity += axis*acceleration*fade*dt
+	queue_redraw()
 
 func _draw():
-	draw_style_box(_panel(), Rect2(-92, 1, 184, 12))
-	for x in range(-78, 80, 25):
-		draw_polyline(PackedVector2Array([Vector2(x,3),Vector2(x+8,7),Vector2(x,11)]), Color("e1ffae"), 3, true)
-
-func _panel():
-	var s = StyleBoxFlat.new()
-	s.bg_color = Color("4c9b38")
-	s.set_corner_radius_all(5)
-	return s
+	var color = Color("51c93a") if direction.x >= 0 else Color("f49b34")
+	plate(Rect2(-dimensions/2,dimensions),Color("4c5964"))
+	plate(Rect2(-dimensions/2+Vector2(4,3),dimensions-Vector2(8,6)),color.lightened(0.2) if active else color)
+	var axis = direction.normalized()
+	var normal = axis.orthogonal()
+	for x in range(-int(dimensions.x/2)+15,int(dimensions.x/2)-10,26):
+		var at = Vector2(x,0)
+		var points = PackedVector2Array([at-axis*4-normal*4,at+axis*4,at-axis*4+normal*4])
+		draw_polyline(points,Color("f2ffd7"),2.5,true)

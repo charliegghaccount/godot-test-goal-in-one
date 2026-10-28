@@ -9,3 +9,8 @@
 The 120 Hz native simulation and original kick/gravity/momentum conversions remain unchanged. V2 removes the near-ball aim restriction and uses screen-relative pulls, even while the camera follows. A circle sweep (ball radius 16), rather than a centre ray, previews approximate rebounds; preview length varies with pull. Air damping/gravity are integrated approximately and boost forces are not predicted. This remains a guide, not an authoritative second physics simulation. No extra cursor tether/power bar is drawn.
 
 The Pages workflow/version remains pinned to the tested Godot 4.6.3. A new build packages saved level scenes. No export publishing is required for F6/local iteration. Mobile platform exports, campaign importer, full editor UI in the browser and the original camera's pinch controls remain outside this increment.
+
+
+## V3 extension
+
+See [MECHANICS.md](MECHANICS.md) for the native sensor/gate interface, collision-layer contract, linking, state transitions, reset/pause semantics and reference comparisons. The existing level scene format, editor plugin and shared gameplay path are retained.

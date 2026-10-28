@@ -1,6 +1,9 @@
 extends RigidBody2D
 
 func _ready():
+	# Layer 1 is solid architecture; layer 2 identifies the football for sensors.
+	collision_layer = 2
+	collision_mask = 1
 	mass = 1.0
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_SHAPE
 	linear_damp = 0.09

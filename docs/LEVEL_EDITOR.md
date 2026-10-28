@@ -60,3 +60,35 @@ Open a level, choose **Goal In One → Duplicate current level**, and save to a 
 - A scene is not in the picker: save it directly in `levels/`, then restart the game/export.
 - Changing a level should invalidate old best scores: use a new stable ID for a revised puzzle.
 - Amber warning on a level root: check missing Spawn/Goal, scoring thresholds or invalid polygons. Headless runtime tests validate all saved levels.
+
+## V3: build puzzles with mechanics
+
+Drag any of the following scenes from the FileSystem dock into the level canvas. Select its root in the Scene tree, use native Move/Rotate tools, and adjust the Inspector properties. Previews are visible while editing. **Dimensions** are local pixels: prefer them over non-uniform node scaling so collision and artwork stay predictable. Save with Cmd+S and use F6/F8 exactly as for ordinary geometry.
+
+| Scene | Inspector controls and behaviour |
+| --- | --- |
+| `scenes/boost.tscn` | Green forward pad. **Direction** defaults to (1,0); **Dimensions**, **Acceleration** (px/s²), **Maximum Speed** (px/s). Keep its long axis on the floor. |
+| `scenes/backward_boost.tscn` | Matching orange pad with Direction (-1,0). It uses the same sensor and acceleration code as the forward pad. Rotate the node to rotate either pad's force. |
+| `scenes/reset_pad.tscn` | Red hazard. Touching it returns the football to Spawn without deleting the ball or erasing shots. It flashes, emits a ring and plays a short falling cue. **Cooldown Seconds** prevents rapid repeated resets. |
+| `scenes/spring.tscn` | Spring launcher. Local UP is the launch direction; rotate the node to aim. **Launch Speed** is px/s, **Momentum Retention** preserves a fraction of incoming velocity, and **Retrigger Delay** debounces contact. The cap compresses briefly then extends. |
+| `scenes/fan.tscn` | Ground fan, local UP by default. **Airflow Range** extends above its housing, **Airflow Acceleration** applies force, and **Maximum Air Speed** limits acceleration along the airflow. Rotate the whole node to redirect both the sensor and force. The blue region previews range; blades and flow marks animate in play. Housing is decorative; the sensor includes the housing so a rolling ball can enter the stream. |
+| `scenes/pressure_switch.tscn` | Low floor switch. **Linked Gate** uses Godot's native node picker: select/assign the Gate node in the same level. **Activation Mode** is Toggle, Timed or Hold; Timed uses **Open Seconds**. The cap moves down while the ball overlaps it. |
+| `scenes/gate.tscn` | Wooden moving barrier. **Dimensions**, **Movement Direction** (local coordinates), **Travel Distance** and **Movement Speed** define its track. The yellow editor line/outline previews the endpoint. **Automatic** makes it cycle between endpoints with **Endpoint Wait**. Leave Automatic off when linking a pressure switch. |
+
+### Link a switch to a gate without code
+
+1. Drag a gate into the level; give it a helpful Scene-tree name such as `ExitGate`.
+2. Move it to its **closed** position. Set its dimensions, movement direction, travel and speed. Leave Automatic off.
+3. Drag a pressure switch onto a floor. Select it, then use **Linked Gate → Assign** and pick `ExitGate`. Godot stores a relative NodePath, so saving/duplicating the whole level retains the link.
+4. Choose **Toggle** (each new contact reverses the gate), **Timed** (opens for Open Seconds, then closes), or **Hold** (open while pressed). Do not manually copy only a switch to a different parent without rechecking its link.
+5. Save, press F6, and roll/kick the ball onto the switch. The cap depresses and the linked gate moves. An unlinked switch shows an Inspector configuration warning and does nothing in play.
+
+Each switch is intended to command one manual gate. Multiple switches issuing contradictory commands to one gate are not arbitrated; the latest command wins. Avoid placing Spawn inside a hazard or closed gate. Sensors rearm after leaving/reentering; springs do not repeatedly fire while continuously overlapped. Reset ball/red pads retain switch/gate state and shots, matching an attempt correction; Restart reloads the level and resets all mechanism state and shots.
+
+### Editable experiments
+
+- `levels/experiment_boost_spring.tscn`: forward runway into a rotated spring, a wooden bank, and a backward return pad.
+- `levels/experiment_fan_hazard.tscn`: upward and angled fans, a red reset strip, and an overhead shelf.
+- `levels/experiment_switch_gate.tscn`: a timed floor switch linked to a sliding gate, plus a separate automatic gate.
+
+These are technical labs, not balanced campaign levels. Duplicate them with the Goal In One menu to experiment. New mechanics are native scenes and require no additional editor/plugin installation.
