@@ -143,17 +143,37 @@ func frame_camera():
 		camera.zoom = Vector2.ONE * minf(screen.x/level.level_size.x,screen.y/level.level_size.y)
 		camera.position = level.camera_origin+level.level_size/2
 	else:
-		camera.zoom = Vector2.ONE * level.follow_zoom
-		camera.position = bounded_camera(ball.position)
+		var screen = get_viewport_rect().size
+		if not level.has_meta("studio_draft"):
+			camera.zoom = Vector2.ONE*level.follow_zoom
+			camera.position = bounded_camera(ball.position)
+			return
+		var minimum_scale = level.minimum_ball_diameter/32.0
+		var width = minf(level.camera_view_size.x,minf(screen.x/minimum_scale,level.level_size.x))
+		var height = minf(level.camera_view_size.y,minf(width*screen.y/screen.x,minf(screen.y/minimum_scale,level.level_size.y)))
+		camera.zoom = Vector2.ONE*minf(screen.x/width,screen.y/height)
+		var initial = level.camera_initial if level.custom_initial else ball.position
+		camera.position = bounded_camera(initial+Vector2(width*0.15,-height*0.2))
+
+func follow_target() -> Vector2:
+	var extent = get_viewport_rect().size/camera.zoom
+	var target = camera.position
+	var look = ball.position+Vector2(clampf(ball.linear_velocity.x/12,-extent.x*0.09,extent.x*0.09),clampf(ball.linear_velocity.y/12,-extent.y*0.09,extent.y*0.09))
+	var half_dead = level.camera_dead_zone.clamp(Vector2(0.08,0.08),Vector2(0.6,0.6))/2
+	target.x += look.x-clampf(look.x,camera.position.x-extent.x*(half_dead.x+0.02),camera.position.x+extent.x*(half_dead.x-0.02))
+	if level.follow_vertical: target.y += look.y-clampf(look.y,camera.position.y-extent.y*half_dead.y,camera.position.y+extent.y*half_dead.y)
+	var safe = minf(52/camera.zoom.x,extent.y*0.17)
+	target.y = clampf(target.y,ball.position.y-extent.y/2+safe,ball.position.y+extent.y/2-safe)
+	return bounded_camera(target)
 
 func bounded_camera(at: Vector2) -> Vector2:
 	var half = get_viewport_rect().size / camera.zoom / 2
 	var size = level.level_size
 	var origin = level.camera_origin
-	if not level.follow_vertical: at.y = spawn_point.y
 	return Vector2(origin.x+size.x/2 if size.x<half.x*2 else clampf(at.x,origin.x+half.x,origin.x+size.x-half.x),origin.y+size.y/2 if size.y<half.y*2 else clampf(at.y,origin.y+half.y,origin.y+size.y-half.y))
 
 func reset_ball():
+	trail.clear()
 	if won:
 		restart()
 		return
@@ -161,6 +181,7 @@ func reset_ball():
 	scoring = false
 	score_time = 0
 	ball.net_capture = false
+	ball.ice_contacts.clear()
 	goal.scored_once = false
 	for object in level.find_children("*", "Area2D", true, false):
 		if object.has_method("reset_contact"): object.reset_contact()
@@ -208,7 +229,7 @@ func back_to_levels():
 func toggle_sound():
 	sound.toggle()
 	if not studio_test: campaign.set_sound(not sound.muted)
-	mute_button.text = "OFF" if sound.muted else "SND"
+	mute_button.icon = preload("res://scripts/ui/timber_ui.gd").icon("mute" if sound.muted else "sound")
 
 func toggle_tools():
 	tools_panel.visible = not tools_panel.visible
@@ -228,7 +249,7 @@ func zoom_camera(factor: float):
 
 func refresh():
 	hud.text = "SHOTS %d  /  PAR %d" % [shots,level.par]
-	mute_button.text = "OFF" if sound.muted else "SND"
+	mute_button.icon = preload("res://scripts/ui/timber_ui.gd").icon("mute" if sound.muted else "sound")
 
 func restart():
 	if studio_test and not StudioBridge.last_json.is_empty():
@@ -273,6 +294,7 @@ func _physics_process(dt):
 func complete():
 	if won or shots == 0: return
 	won = true
+	mechanic_feedback("win",ball.position)
 	# Stop actuators, never remove CollisionObject2D bodies from the physics world.
 	for object in level.find_children("*","Node2D",true,false):
 		if object.has_method("bind_game"): object.set_physics_process(false)
@@ -347,69 +369,79 @@ func _unhandled_input(event):
 func _process(dt):
 	if not is_instance_valid(ball): return
 	if level.camera_mode == 1 and not exploring:
-		camera.position = camera.position.lerp(bounded_camera(ball.position),1-exp(-dt*level.camera_speed))
+		camera.position = camera.position.lerp(follow_target(),1-exp(-dt*level.camera_speed))
 	elif level.camera_mode == 0 and not exploring: frame_camera()
 	if ball.linear_velocity.length()>100:
 		trail.append(ball.position)
-		if trail.size()>18: trail.remove_at(0)
+		if trail.size()>13: trail.remove_at(0)
 	elif not trail.is_empty(): trail.remove_at(0)
 	queue_redraw()
 	if ball.position.y > level.camera_origin.y+level.level_size.y+150 and not paused: reset_ball()
 
-func _draw():
-	for i in range(1,trail.size()):
-		draw_line(trail[i-1],trail[i],Color(1,1,1,float(i)/trail.size()*0.18),3,true)
-	if not aiming or not is_instance_valid(ball) or pull.length()<6: return
+func aim_points() -> PackedVector2Array:
+	var points = PackedVector2Array()
 	var pos = ball.position
 	var velocity = ball.shot_velocity(pull)
-	var space = get_world_2d().direct_space_state
-	var circle = CircleShape2D.new()
-	circle.radius = 16
-	var query = PhysicsShapeQueryParameters2D.new()
-	query.shape = circle
-	query.exclude = [ball.get_rid()]
-	query.collision_mask = 1
-	var spacing = 14.0/camera.zoom.x
-	var next_dot = spacing
-	var distance = 0.0
-	var dots = 0
-	for i in range(100):
-		var before = pos
-		var step = velocity / 120.0
-		query.transform = Transform2D(0,pos)
-		query.motion = step
-		var fraction = space.cast_motion(query)
-		if fraction[0] < 1.0:
-			pos += step*fraction[0]
-			query.transform.origin = before+step*fraction[1]
-			query.motion = Vector2.ZERO
-			var rest = space.get_rest_info(query)
-			if rest.is_empty(): break
-			velocity = velocity.bounce(rest.normal)*0.76
-			pos += rest.normal*0.3
-		else: pos += step
-		var length = before.distance_to(pos)
-		while distance+length>=next_dot and dots<50:
-			var at = before.lerp(pos,(next_dot-distance)/maxf(length,0.001))
-			draw_circle(at,2.7/camera.zoom.x,Color(1,0.97,0.75,0.85*(1.0-dots/52.0)))
-			next_dot += spacing
-			dots += 1
-		distance += length
-		velocity *= 0.99925
-		velocity.y += level.gravity/120.0
-		if dots>=50: break
+	for i in 50:
+		velocity *= 0.9985
+		velocity.y += level.gravity/60.0
+		pos += velocity/60.0
+		if i%3==0: points.append(pos)
+	return points
+
+func goal_indicator() -> Dictionary:
+	if not is_instance_valid(goal) or not is_instance_valid(camera): return {}
+	var screen = get_viewport_rect().size
+	var content = screen
+	if level.camera_mode==0: content = level.level_size*minf(screen.x/level.level_size.x,screen.y/level.level_size.y)
+	var rect = Rect2((screen-content)/2,content)
+	var target = goal.get_global_transform_with_canvas()*Vector2(0,-goal.goal_size.y/2)
+	if rect.has_point(target): return {}
+	var margin = minf(40,content.y/5)
+	var point = target.clamp(rect.position+Vector2.ONE*margin,rect.end-Vector2.ONE*margin)
+	return {"point":point,"angle":(target-point).angle()}
+
+func draw_goal_indicator():
+	var indicator = goal_indicator()
+	if indicator.is_empty(): return
+	var at = get_global_transform_with_canvas().affine_inverse()*indicator.point
+	draw_set_transform(at,0,Vector2.ONE/camera.zoom.x)
+	draw_circle(Vector2.ZERO,19,Color("174c39ee"))
+	var axis = Vector2.from_angle(indicator.angle)
+	draw_line(-axis*8,axis*8,Color("dcffb0"),3,true)
+	draw_polyline(PackedVector2Array([axis*2-axis.orthogonal()*6,axis*8,axis*2+axis.orthogonal()*6]),Color("dcffb0"),3,true)
+	draw_string(ThemeDB.fallback_font,Vector2(-24,-25),"GOAL",HORIZONTAL_ALIGNMENT_CENTER,48,10,Color("174c39"))
+	draw_set_transform(Vector2.ZERO)
+
+func _draw():
+	draw_goal_indicator()
+	for i in trail.size(): draw_circle(trail[i],2,Color(0.36,0.51,0.47,float(i)/trail.size()*0.25))
+	if not is_instance_valid(ball): return
+	if not aiming or pull.length()<6:
+		if not won and not scoring: draw_arc(ball.position,25,0,TAU,48,Color("1d827e55"),1.8,true)
+		return
+	var points = aim_points()
+	for i in points.size():
+		var fraction = float(i)/points.size()
+		draw_circle(points[i],3.7-fraction*2,Color(1,1,1,(1-fraction)*0.95))
+	var b = ball.position
+	var ratio = minf(1,140/maxf(pull.length(),1))
+	draw_dashed_line(b,b+pull*ratio,Color("163b5b66"),2,5)
+	var axis = -pull.normalized()
+	var end = b+axis*(minf(90,pull.length())*0.7+20)
+	draw_line(b+axis*20,end,Color("edff74"),5,true)
+	draw_polyline(PackedVector2Array([end-axis.rotated(-0.5)*11,end,end-axis.rotated(0.5)*11]),Color("edff74"),5,true)
+	draw_arc(b,23,-PI/2,-PI/2+TAU*minf(1,pull.length()/140),48,Color("edff74"),3,true)
+	draw_circle(b+pull*ratio,5,Color.WHITE)
+	var font = ThemeDB.fallback_font
+	var text = "%d%% POWER"%roundi(minf(1,pull.length()/140)*100)
+	var width = font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,10).x+24
+	draw_style_box(preload("res://scripts/ui/timber_ui.gd").box(Color("17364c"),Color("17364c")),Rect2(b+Vector2(-width/2,-75),Vector2(width,26)))
+	draw_string(font,b+Vector2(-width/2,-58),text,HORIZONTAL_ALIGNMENT_CENTER,width,10,Color("edff74"))
 
 func mechanic_feedback(kind: String, at: Vector2):
-	var ring = Node2D.new()
-	ring.position = at
-	add_child(ring)
-	var circle = Line2D.new()
-	circle.width = 3
-	circle.default_color = Color("ff6b67") if kind == "reset" else Color("fff0a1")
-	for i in range(33): circle.add_point(Vector2.from_angle(i*TAU/32)*24)
-	ring.add_child(circle)
-	var tween = create_tween().set_parallel(true)
-	tween.tween_property(ring,"scale",Vector2(2,2),0.35)
-	tween.tween_property(ring,"modulate:a",0.0,0.35)
-	tween.chain().tween_callback(ring.queue_free)
+	var particles = preload("res://scripts/feedback_particles.gd").new()
+	particles.position = at
+	particles.setup(kind)
+	add_child(particles)
 	if is_instance_valid(sound): sound.effect(kind)

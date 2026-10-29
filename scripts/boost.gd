@@ -23,15 +23,7 @@ func _physics_process(dt):
 	queue_redraw()
 
 func _draw():
-	var color = Color("51c93a") if direction.x >= 0 else Color("f49b34")
-	plate(Rect2(-dimensions/2,dimensions),Color("4c5964"))
-	plate(Rect2(-dimensions/2+Vector2(4,3),dimensions-Vector2(8,6)),color.lightened(0.2) if active else color)
-	var axis = direction.normalized()
-	var normal = axis.orthogonal()
-	for x in range(-int(dimensions.x/2)+15,int(dimensions.x/2)-10,26):
-		var at = Vector2(x,0)
-		var points = PackedVector2Array([at-axis*4-normal*4,at+axis*4,at-axis*4+normal*4])
-		draw_polyline(points,Color("f2ffd7"),2.5,true)
+	preload("res://scripts/pad_art.gd").draw_pad(self,dimensions,"forward" if direction.x>=0 else "backward")
 
 func activate():
 	feedback("boost")

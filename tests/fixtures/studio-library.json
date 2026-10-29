@@ -1,0 +1,166 @@
+{
+  "format": "goal-in-one-level",
+  "version": 1,
+  "draftId": "v7-studio-library",
+  "modified": "2026-10-29T13:00:34.765Z",
+  "difficulty": 2,
+  "tags": [],
+  "level": {
+    "id": 1001,
+    "boostVersion": 2,
+    "name": "Original Studio object library",
+    "tip": "Find your route into the net.",
+    "par": 3,
+    "starShots": [
+      3,
+      5
+    ],
+    "width": 1257,
+    "start": {
+      "x": 130,
+      "y": 618
+    },
+    "goal": {
+      "x": 1120,
+      "y": 640,
+      "w": 107,
+      "h": 100,
+      "roof": 82,
+      "direction": 1
+    },
+    "boundary": [
+      {
+        "x": 60,
+        "y": 640
+      },
+      {
+        "x": 60,
+        "y": 120
+      },
+      {
+        "x": 1120,
+        "y": 120
+      },
+      {
+        "x": 1120,
+        "y": 640
+      }
+    ],
+    "outline": [
+      {
+        "x": 60,
+        "y": 640
+      },
+      {
+        "x": 60,
+        "y": 120
+      },
+      {
+        "x": 1120,
+        "y": 120
+      },
+      {
+        "x": 1120,
+        "y": 640
+      }
+    ],
+    "obstacles": [],
+    "surfaces": [],
+    "movers": [],
+    "mechanics": {
+      "rotors": [
+        {
+          "x": 350,
+          "y": 330,
+          "w": 200,
+          "h": 24,
+          "speed": 0.35,
+          "phase": 0
+        },
+        {
+          "x": 650,
+          "y": 350,
+          "w": 28,
+          "h": 160,
+          "speed": 0.35,
+          "phase": 0,
+          "pivot": {
+            "x": 650,
+            "y": 270
+          },
+          "amplitude": 0.65,
+          "period": 5
+        }
+      ],
+      "breakables": [
+        {
+          "id": "breakable-1",
+          "x": 820,
+          "y": 500,
+          "w": 48,
+          "h": 120,
+          "threshold": 5
+        }
+      ],
+      "ice": [
+        {
+          "x": 320,
+          "y": 640,
+          "w": 160,
+          "friction": 0.00015,
+          "angle": 0
+        }
+      ],
+      "winds": [
+        {
+          "x": 920,
+          "y": 260,
+          "w": 200,
+          "h": 200,
+          "angle": 70,
+          "strength": 1.3
+        }
+      ],
+      "springs": [
+        {
+          "x": 155,
+          "y": 640,
+          "w": 90,
+          "angle": 70,
+          "strength": 17
+        }
+      ],
+      "gates": [
+        {
+          "id": "gate-1",
+          "x": 1080,
+          "y": 570,
+          "w": 48,
+          "h": 140,
+          "offset": {
+            "x": 0,
+            "y": -160
+          }
+        }
+      ],
+      "switches": [
+        {
+          "id": "switch-1",
+          "x": 930,
+          "y": 610,
+          "gateId": "gate-1",
+          "mode": "timed",
+          "duration": 8
+        }
+      ]
+    },
+    "camera": {
+      "mode": "fixed",
+      "viewWidth": 990,
+      "viewHeight": 560,
+      "minimumBallDiameterPx": 20,
+      "smoothing": 0.11
+    },
+    "experimental": true
+  }
+}

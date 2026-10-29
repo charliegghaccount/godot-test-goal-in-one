@@ -53,8 +53,8 @@ func run():
 	for bad in ['{}','{"format":"goal-in-one-level","version":99,"level":{}}']:
 		check(not parser.parse(bad).errors.is_empty(),"invalid envelope rejected")
 	var draft = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/basic.json"))
-	draft.level.mechanics={"rotors":[{"x":10}]}
-	check("Unsupported mechanic: rotors" in parser.parse(JSON.stringify(draft)).errors,"unsupported objects explicitly rejected")
+	draft.level.mechanics={"teleporters":[{"x":10}]}
+	check("Unsupported mechanic: teleporters" in parser.parse(JSON.stringify(draft)).errors,"unsupported objects explicitly rejected")
 	draft.level.mechanics={}
 	draft.level.start.x="bad"
 	check(not parser.parse(JSON.stringify(draft)).errors.is_empty(),"invalid coordinate rejected")

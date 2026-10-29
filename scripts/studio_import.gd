@@ -35,7 +35,7 @@ func prefab(name: String) -> Node2D:
 func wood(level: Node, points: PackedVector2Array, grass: bool, grain_angle: float = 0.0):
 	var node = prefab("timber")
 	node.polygon = points
-	node.texture_rotation = grain_angle
+	node.grain_angle = grain_angle
 	node.grass_edging = grass
 	level.add_child(node)
 func beam(level: Node,a: Vector2,b: Vector2,grass: bool):
@@ -43,7 +43,7 @@ func beam(level: Node,a: Vector2,b: Vector2,grass: bool):
 	var n = (b-a).normalized().orthogonal()*5.2
 	var node = prefab("timber")
 	node.polygon = PackedVector2Array([a+n,b+n,b-n,a-n])
-	node.texture_rotation = (b-a).angle()
+	node.grain_angle = (b-a).angle()
 	node.seam_points = PackedVector2Array([a,b])
 	node.grass_edging = grass and absf(a.y-b.y)<0.1
 	level.add_child(node)
@@ -101,12 +101,23 @@ func parse(text: String) -> Dictionary:
 		if not has_boundary:
 			beam(level,edge[-1],goal.position-Vector2(0,height),false)
 			beam(level,edge[0],goal.position+Vector2(width,0),d.get("grass",true)==true)
+	# The reference puts a translucent sky wash inside the playable arena.
+	var wash = Polygon2D.new()
+	var fill = edge.duplicate()
+	if not has_boundary:
+		fill.append(goal.position-Vector2(0,height))
+		fill.append(goal.position+Vector2(width*goal.roof_ratio,-height))
+		fill.append(goal.position+Vector2(width,0))
+	wash.polygon = fill
+	wash.color = Color(238.0/255,249.0/255,1,0.14)
+	wash.z_index = -2
+	level.add_child(wash)
 	for o in objects(d,"obstacles"):
 		# Studio already rotates polygon vertices; rotation is authoring metadata, not another transform.
 		if o.has("grass") and not o.grass is bool:
 			errors.append("Object grass must be boolean")
 			continue
-		wood(level,polygon(o.get("points")),o.get("grass",true),number(o,"rotation",0))
+		wood(level,polygon(o.get("points")),o.get("grass",false),number(o,"rotation",0))
 	for s in objects(d,"surfaces"):
 		var kind = s.get("kind","")
 		if not kind in ["forward","backward","delete"]: errors.append("Unsupported surface: "+str(kind)); continue
@@ -121,7 +132,7 @@ func parse(text: String) -> Dictionary:
 	var mechanics = d.get("mechanics",{})
 	if not mechanics is Dictionary: mechanics = {}; errors.append("Invalid mechanics")
 	for key in mechanics:
-		if not key in ["springs","gates","switches"] and mechanics[key]!=[]: errors.append("Unsupported mechanic: "+str(key))
+		if not key in ["springs","gates","switches","rotors","breakables","ice","winds"] and mechanics[key]!=[]: errors.append("Unsupported mechanic: "+str(key))
 	for m in objects(d,"movers"):
 		var node = prefab("mover")
 		node.position = point(m)
@@ -130,6 +141,7 @@ func parse(text: String) -> Dictionary:
 		node.period = number(m,"period",8,0.1,1000)
 		node.axis = 1 if m.get("axis", "y")=="x" else 0
 		node.rotation = number(m,"angle",0)
+		node.grass_edging = m.get("grass",false)==true
 		if m.has("path"):
 			if m.path is Dictionary:
 				node.use_path = true
@@ -138,6 +150,43 @@ func parse(text: String) -> Dictionary:
 				node.once = m.get("loop", "ping-pong")=="once"
 				node.phase = number(m,"phase",0)
 			else: errors.append("Invalid mover path")
+		level.add_child(node)
+	for r in objects(mechanics,"rotors"):
+		var node = prefab("rotor")
+		node.position = point(r)
+		node.dimensions = Vector2(number(r,"w",140,8,10000),number(r,"h",24,8,10000))
+		node.speed = number(r,"speed",1,-100,100)
+		node.phase = number(r,"phase",0)
+		node.swinging = r.has("amplitude")
+		node.amplitude = number(r,"amplitude",0.5,0,100)
+		node.period = number(r,"period",5,0.1,1000)
+		node.grass_edging = r.get("grass",false)==true
+		if r.has("pivot"):
+			node.use_pivot = true
+			node.pivot = point(r.pivot)
+		level.add_child(node)
+	for b in objects(mechanics,"breakables"):
+		var node = prefab("breakable")
+		node.position = point(b)
+		node.dimensions = Vector2(number(b,"w",80,8,10000),number(b,"h",120,8,10000))
+		node.threshold = number(b,"threshold",9,0.01,1000)*60
+		node.grass_edging = b.get("grass",false)==true
+		level.add_child(node)
+	for region in objects(mechanics,"ice"):
+		var node = prefab("ice")
+		var ice_width = number(region,"w",120,8,10000)
+		node.rotation = number(region,"angle",0)
+		node.position = point(region)+Vector2(ice_width/2,-6).rotated(node.rotation)
+		node.dimensions = Vector2(ice_width,10)
+		node.friction = number(region,"friction",0.0005,0,0.04)
+		level.add_child(node)
+	for region in objects(mechanics,"winds"):
+		var node = prefab("wind")
+		node.dimensions = Vector2(number(region,"w",200,8,10000),number(region,"h",120,8,10000))
+		node.position = point(region)+node.dimensions/2
+		var angle = deg_to_rad(number(region,"angle",0))
+		node.direction = Vector2(cos(angle),-sin(angle))
+		node.acceleration = number(region,"strength",1,0,100)*3600
 		level.add_child(node)
 	for s in objects(mechanics,"springs"):
 		var node = prefab("spring")
@@ -156,6 +205,7 @@ func parse(text: String) -> Dictionary:
 		var node = prefab("gate")
 		node.position = point(s)
 		node.dimensions = Vector2(number(s,"w",40,12,10000),number(s,"h",160,12,10000))
+		node.grass_edging = s.get("grass",false)==true
 		var offset = point(s.get("offset",{"x":0,"y":-170}))
 		node.movement_direction = offset.normalized()
 		node.travel_distance = offset.length()
@@ -166,7 +216,7 @@ func parse(text: String) -> Dictionary:
 	for s in objects(mechanics,"switches"):
 		var node = prefab("pressure_switch")
 		node.position = point(s)
-		if not s.has("w") and not s.has("h"): errors.append("Unsupported: legacy circular pressure switch; resize it in Studio")
+		node.circular_sensor = not s.has("w") and not s.has("h")
 		node.dimensions = Vector2(number(s,"w",36,8,10000),number(s,"h",36,8,10000))
 		if not s.get("mode","toggle") in ["toggle","timed"]: errors.append("Unsupported switch mode")
 		node.activation_mode = 1 if s.get("mode")=="timed" else 0
@@ -181,9 +231,15 @@ func parse(text: String) -> Dictionary:
 	if not mode in ["fixed","follow-x","follow-xy"]: errors.append("Unsupported camera mode")
 	level.camera_mode = 0 if mode=="fixed" else 1
 	level.follow_vertical = mode!="follow-x"
+	level.camera_view_size = Vector2(number(camera,"viewWidth",1280,100,10000),number(camera,"viewHeight",720,100,10000))/number(camera,"zoom",1,0.6,2)
+	level.minimum_ball_diameter = number(camera,"minimumBallDiameterPx",20,1,100)
 	level.follow_zoom = maxf(1280.0/number(camera,"viewWidth",1280,100,10000),720.0/number(camera,"viewHeight",720,100,10000))*number(camera,"zoom",1,0.1,10)
-	if camera.has("initial"): errors.append("Unsupported: custom camera initial point")
-	if camera.has("deadZone"): errors.append("Unsupported: custom camera dead zone")
+	if camera.has("initial"):
+		level.custom_initial = true
+		level.camera_initial = point(camera.initial)
+	if camera.has("deadZone"):
+		level.camera_dead_zone = point(camera.deadZone)
+		if level.camera_dead_zone.x<0 or level.camera_dead_zone.x>1 or level.camera_dead_zone.y<0 or level.camera_dead_zone.y>1: errors.append("Invalid camera dead zone")
 	level.camera_speed = -log(1-number(camera,"smoothing",0.11,0.001,0.99))*60
 	if camera.has("bounds"):
 		var bounds = camera.bounds
@@ -192,6 +248,15 @@ func parse(text: String) -> Dictionary:
 			level.level_size = Vector2(number(bounds,"w",1280,320,100000),number(bounds,"h",720,240,100000))
 		else: errors.append("Invalid camera bounds")
 	if not camera.get("windows",[]) is Array or not camera.get("windows",[]).is_empty(): errors.append("Unsupported: camera view windows; remove camera regions before testing")
+	# Preserve the reference's deliberate legacy framing, not the editor's bounds.
+	if not has_boundary and not d.has("camera") and edge.size()>0:
+		var top = edge[0].y
+		var bottom = edge[0].y
+		for vertex in edge:
+			top = minf(top,vertex.y)
+			bottom = maxf(bottom,vertex.y)
+		level.camera_origin = Vector2(25,top-65)
+		level.level_size = Vector2(1250,bottom-top+120)
 	level.set_meta("studio_draft",draft.duplicate(true))
 	if not errors.is_empty():
 		level.free()

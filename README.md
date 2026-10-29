@@ -1,12 +1,14 @@
-# Goal In One — Godot V6
+# Goal In One — Godot V7
 
 Native Godot 4 / GDScript football puzzle prototype with a visual level-authoring foundation. Standard Godot **4.6.3** is tested and pinned in the web workflow; no .NET or application secrets are needed.
 
-**V6 game flow:** the runtime opens the main menu. PLAY resumes the first unfinished official course; LEVEL SELECT shows the original **levels 1–20**, stars and unavailable future slots. See [V6 flow and validation](docs/V6_GAME_FLOW.md). Goal collisions/scoring, damping, seam protection, moving timbers, background framing have been updated. Spoken announcer lines are temporarily disabled. V6 adds the complete native menu, campaign selection and compact HUD. Read the [parity report](docs/V5_PARITY.md) for measurements and remaining differences.
+**V7:** See the [visual and gameplay parity report](docs/V7_PARITY.md) and paired contact sheets.
+
+**Game flow:** the runtime opens the main menu. PLAY resumes the first unfinished official course; LEVEL SELECT shows the original **levels 1–20**, stars and unavailable future slots. See [V6 flow and validation](docs/V6_GAME_FLOW.md). Goal collisions/scoring, damping, seam protection, moving timbers, background framing have been updated. Spoken announcer lines are temporarily disabled. V6 adds the complete native menu, campaign selection and compact HUD. Read the [parity report](docs/V5_PARITY.md) for measurements and remaining differences.
 
 **Primary level-design workflow:** use the original [Web Level Studio](https://charliegghaccount.github.io/goal-in-one-test/) and its **Test in Godot** button. See [the integration guide](docs/WEB_STUDIO.md). Native scene editing remains optional.
 
-**Interactive mechanics:** forward/backward boosts, reset strip, spring, directional fan, pressure switches and moving gates are reusable scenes with Inspector controls. Three editable experimental levels demonstrate their combinations. See [mechanic design notes](docs/MECHANICS.md).
+**Interactive mechanics:** forward/backward boosts, reset strips, springs, fans/wind regions, switches/gates, rotors/swings, breakable wood and ice are reusable scenes with Studio imports and Inspector controls. Three editable experimental levels demonstrate their combinations. See [mechanic design notes](docs/MECHANICS.md).
 
 **Start designing:** [Beginner Level Editor Guide](docs/LEVEL_EDITOR.md).
 
@@ -32,6 +34,7 @@ godot --headless --script res://tests/import.gd
 godot --headless --script res://tests/progression.gd
 godot --headless --script res://tests/rolling.gd
 godot --headless --script res://tests/game_flow.gd
+godot --headless --script res://tests/v7_mechanics.gd
 mkdir -p build/web
 godot --headless --export-release Web build/web/index.html
 python3 -m http.server 8000 --directory build/web

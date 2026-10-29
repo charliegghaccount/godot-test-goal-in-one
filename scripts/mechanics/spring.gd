@@ -33,5 +33,5 @@ func _draw():
 		coil.append(Vector2((-1 if i%2 else 1)*w*0.28,lerpf(top+5,h/2-6,i/8.0)))
 	draw_polyline(coil,Color("263645"),6,true)
 	draw_polyline(coil,Color("e3edf0"),3,true)
-	plate(Rect2(-w/2,top,w,8),Color("f9bd4f"))
-	draw_line(Vector2(-w/2+5,top+2),Vector2(w/2-5,top+2),Color("fff0a5"),2,true)
+	plate(Rect2(-w/2,top,w,8),Color("f64c3d"))
+	draw_line(Vector2(-w/2+5,top+2),Vector2(w/2-5,top+2),Color("ff9771"),2,true)

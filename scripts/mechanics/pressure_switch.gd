@@ -7,6 +7,7 @@ extends "res://scripts/mechanics/area.gd"
 		if is_inside_tree(): update_configuration_warnings()
 @export_enum("Toggle", "Timed", "Hold") var activation_mode: int = 0
 @export_range(0.2,30,0.1) var open_seconds: float = 6.0
+@export var circular_sensor = false
 var remaining = 0.0
 var pressed_amount = 0.0
 
@@ -48,3 +49,13 @@ func _draw():
 	var top = -dimensions.y/2+pressed_amount*5
 	plate(Rect2(-dimensions.x/2+5,top,dimensions.x-10,6),Color("65dc65") if active else Color("f2b846"))
 	draw_circle(Vector2(0,top+3),2,Color("fff6c7"))
+
+func _sync_shape():
+	if not circular_sensor:
+		super._sync_shape()
+		return
+	if not is_instance_valid(sensor):
+		sensor = CollisionShape2D.new()
+		add_child(sensor)
+	sensor.shape = CircleShape2D.new()
+	sensor.shape.radius = 18

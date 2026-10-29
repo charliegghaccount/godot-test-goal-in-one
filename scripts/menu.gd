@@ -11,6 +11,10 @@ var tiles: Array[Button] = []
 var play_button: Button
 var back_button: Button
 var chapter_total: Label
+var home_title: Label
+var home_subtitle: Label
+var home_column: VBoxContainer
+var scenery: Node2D
 var backdrop: CanvasLayer
 func _ready():
 	campaign.progress_path = progress_path
@@ -21,11 +25,16 @@ func _ready():
 	backdrop = CanvasLayer.new()
 	backdrop.layer = -10
 	add_child(backdrop)
-	backdrop.add_child(preload("res://scripts/park_background.gd").new())
+	var park = preload("res://scripts/park_background.gd").new()
+	park.menu_mode = true
+	backdrop.add_child(park)
+	scenery = preload("res://scripts/menu_scenery.gd").new()
+	backdrop.add_child(scenery)
 	var layer = CanvasLayer.new()
 	add_child(layer)
 	screen = Control.new()
 	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	screen.texture_repeat = CanvasItem.TEXTURE_REPEAT_MIRROR
 	screen.theme = UI.theme()
 	layer.add_child(screen)
 	get_viewport().size_changed.connect(reflow)
@@ -35,6 +44,7 @@ func _ready():
 		if requested.is_valid_int() and int(requested)>0 and int(requested)<=campaign.entries.size(): launch(campaign.entries[int(requested)-1].path)
 func clear_screen(name: String):
 	screen_name = name
+	if is_instance_valid(scenery): scenery.visible = name=="home"
 	for child in screen.get_children():
 		screen.remove_child(child)
 		child.queue_free()
@@ -53,21 +63,29 @@ func card(width: float = 420) -> VBoxContainer:
 	return column
 func show_home():
 	clear_screen("home")
-	var column = card()
-	column.add_child(UI.label("GOAL IN ONE",38))
-	column.add_child(UI.label("GRASS PARKS • YOUR KICK. YOUR ANGLE.",15))
-	var ball = TextureRect.new()
-	ball.texture = preload("res://assets/football.svg")
-	ball.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	ball.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ball.custom_minimum_size.y = 54
-	column.add_child(ball)
+	var center = CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	screen.add_child(center)
+	var column = VBoxContainer.new()
+	home_column = column
+	column.custom_minimum_size.x = minf(470,get_viewport_rect().size.x*0.76)
+	center.add_child(column)
+	var sign = PanelContainer.new()
+	column.add_child(sign)
+	var logo = VBoxContainer.new()
+	sign.add_child(logo)
+	home_title = UI.label("GOAL",80)
+	logo.add_child(home_title)
+	home_subtitle = UI.label("IN ONE",60)
+	home_subtitle.add_theme_color_override("font_color",Color("ffd15c"))
+	logo.add_child(home_subtitle)
 	play_button = UI.button("PLAY",func(): launch(campaign.continue_path()),true)
 	play_button.disabled = campaign.entries.is_empty()
 	column.add_child(play_button)
 	column.add_child(UI.button("LEVEL SELECT",open_levels))
 	column.add_child(UI.button("SETTINGS",show_settings))
 	column.add_child(UI.label("%d official courses • Unlimited kicks"%campaign.entries.size(),15))
+	reflow()
 func open_levels(path: String = ""):
 	if not path.is_empty(): chapter = maxi(0,campaign.index_of(path))/25
 	stop_game()
@@ -146,6 +164,11 @@ func open_levels(path: String = ""):
 	nav.add_child(next)
 	reflow()
 func reflow():
+	if screen_name=="home" and is_instance_valid(home_title):
+		var height = get_viewport_rect().size.y
+		home_title.add_theme_font_size_override("font_size",80 if height>=600 else 62 if height>=500 else 46)
+		home_subtitle.add_theme_font_size_override("font_size",60 if height>=600 else 44 if height>=500 else 30)
+		home_column.add_theme_constant_override("separation",16 if height>=600 else 8)
 	if screen_name=="levels":
 		var h = maxf(44,minf(92,(get_viewport_rect().size.y-188)/5))
 		for tile in tiles: tile.custom_minimum_size.y = h

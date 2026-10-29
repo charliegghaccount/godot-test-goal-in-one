@@ -16,3 +16,6 @@ Full-power shots at the listed angles, sampled for 3 seconds. This is a comparis
 | 14 | -15 | False | False | 43.4 |
 | 14 | -35 | True | True | 26.6 |
 | 14 | -55 | False | False | 54.0 |
+
+
+V7 expands this probe collection to levels 1, 2, 5, 6, 9, 10, 14 and 18–20 plus the spring and Studio-library fixtures. See [current V7 measurements](v7-route-metrics.json) and [the parity report](../docs/V7_PARITY.md); the historical table above is retained for context.

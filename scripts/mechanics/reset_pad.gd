@@ -26,8 +26,4 @@ func _physics_process(dt):
 	queue_redraw()
 
 func _draw():
-	plate(Rect2(-dimensions/2,dimensions),Color("47515d"))
-	plate(Rect2(-dimensions/2+Vector2(3,3),dimensions-Vector2(6,6)),Color("dd3545").lightened(flash*0.6))
-	for x in range(-int(dimensions.x/2)+10,int(dimensions.x/2)-8,20):
-		draw_line(Vector2(x,-dimensions.y/2+4),Vector2(x+8,dimensions.y/2-4),Color("ffb3a3"),3,true)
-	if flash > 0: draw_arc(Vector2.ZERO,dimensions.x/2+flash*18,0,TAU,32,Color(1,0.3,0.2,flash),3,true)
+	preload("res://scripts/pad_art.gd").draw_pad(self,dimensions,"delete",flash)

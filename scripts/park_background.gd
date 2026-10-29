@@ -1,10 +1,16 @@
 extends Node2D
+var menu_mode = false
 var camera: Camera2D
 var reference = Vector2.ZERO
 var image = preload("res://assets/park.webp")
 func _process(_dt): queue_redraw()
 func _draw():
 	var screen = get_viewport_rect().size
+	if menu_mode:
+		var scale = maxf(screen.x/image.get_width(),screen.y/image.get_height())
+		var size = image.get_size()*scale
+		draw_texture_rect(image,Rect2((screen-size)/2,size),false)
+		return
 	var delta = camera.position-reference if is_instance_valid(camera) else Vector2.ZERO
 	var h = screen.y*1.05
 	var w = h*image.get_width()/image.get_height()

@@ -14,6 +14,11 @@ extends Node2D
 @export var camera_origin: Vector2 = Vector2.ZERO
 @export var follow_vertical: bool = true
 @export var camera_speed: float = 6.0
+@export var camera_view_size = Vector2(1280,720)
+@export var minimum_ball_diameter = 20.0
+@export var camera_dead_zone = Vector2(0.25,0.22)
+@export var custom_initial = false
+@export var camera_initial = Vector2.ZERO
 @export var gravity: float = 1100.0
 @export var background: Texture2D = preload("res://assets/park.webp")
 

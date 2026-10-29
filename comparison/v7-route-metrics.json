@@ -1,0 +1,254 @@
+[
+  {
+    "level": 1,
+    "angle": -15,
+    "matter_win": true,
+    "godot_win": true,
+    "endpoint_separation": 20.31
+  },
+  {
+    "level": 1,
+    "angle": -35,
+    "matter_win": true,
+    "godot_win": true,
+    "endpoint_separation": 26.6
+  },
+  {
+    "level": 1,
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 19.8
+  },
+  {
+    "level": 2,
+    "angle": -15,
+    "matter_win": true,
+    "godot_win": true,
+    "endpoint_separation": 50.86
+  },
+  {
+    "level": 2,
+    "angle": -35,
+    "matter_win": true,
+    "godot_win": false,
+    "endpoint_separation": 567.03
+  },
+  {
+    "level": 2,
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 69.29
+  },
+  {
+    "level": 5,
+    "angle": -15,
+    "matter_win": true,
+    "godot_win": true,
+    "endpoint_separation": 26.21
+  },
+  {
+    "level": 5,
+    "angle": -35,
+    "matter_win": true,
+    "godot_win": true,
+    "endpoint_separation": 26.6
+  },
+  {
+    "level": 5,
+    "angle": -55,
+    "matter_win": true,
+    "godot_win": false,
+    "endpoint_separation": 535.16
+  },
+  {
+    "level": 6,
+    "angle": -15,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 72.29
+  },
+  {
+    "level": 6,
+    "angle": -35,
+    "matter_win": true,
+    "godot_win": true,
+    "endpoint_separation": 26.6
+  },
+  {
+    "level": 6,
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 475.78
+  },
+  {
+    "level": 9,
+    "angle": -15,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 85.05
+  },
+  {
+    "level": 9,
+    "angle": -35,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 75.01
+  },
+  {
+    "level": 9,
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 69.97
+  },
+  {
+    "level": 10,
+    "angle": -15,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 0.85
+  },
+  {
+    "level": 10,
+    "angle": -35,
+    "matter_win": true,
+    "godot_win": true,
+    "endpoint_separation": 26.6
+  },
+  {
+    "level": 10,
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 0.77
+  },
+  {
+    "level": 14,
+    "angle": -15,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 43.38
+  },
+  {
+    "level": 14,
+    "angle": -35,
+    "matter_win": true,
+    "godot_win": true,
+    "endpoint_separation": 26.6
+  },
+  {
+    "level": 14,
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 54.03
+  },
+  {
+    "level": 18,
+    "angle": -15,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 927.33
+  },
+  {
+    "level": 18,
+    "angle": -35,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 469.67
+  },
+  {
+    "level": 18,
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 69.3
+  },
+  {
+    "level": 19,
+    "angle": -15,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 177.77
+  },
+  {
+    "level": 19,
+    "angle": -35,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 175.69
+  },
+  {
+    "level": 19,
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 613.51
+  },
+  {
+    "level": 20,
+    "angle": -15,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 0.85
+  },
+  {
+    "level": 20,
+    "angle": -35,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 0.04
+  },
+  {
+    "level": 20,
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 134.32
+  },
+  {
+    "level": "mechanics",
+    "angle": -15,
+    "matter_win": true,
+    "godot_win": true,
+    "endpoint_separation": 53.61
+  },
+  {
+    "level": "mechanics",
+    "angle": -35,
+    "matter_win": true,
+    "godot_win": true,
+    "endpoint_separation": 38.47
+  },
+  {
+    "level": "mechanics",
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 30.86
+  },
+  {
+    "level": "studio-library",
+    "angle": -15,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 511.86
+  },
+  {
+    "level": "studio-library",
+    "angle": -35,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 212.08
+  },
+  {
+    "level": "studio-library",
+    "angle": -55,
+    "matter_win": false,
+    "godot_win": false,
+    "endpoint_separation": 156.2
+  }
+]

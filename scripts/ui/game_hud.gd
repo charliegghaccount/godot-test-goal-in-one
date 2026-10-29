@@ -4,6 +4,7 @@ static func build(game: Node):
 	var layer = CanvasLayer.new()
 	game.add_child(layer)
 	var root = Control.new()
+	root.texture_repeat = CanvasItem.TEXTURE_REPEAT_MIRROR
 	root.theme = UI.theme()
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -28,13 +29,13 @@ static func build(game: Node):
 	row.add_child(stats)
 	game.hud = UI.label("",18)
 	stats.add_child(game.hud)
-	var mute = UI.button("SND",game.toggle_sound)
+	var mute = UI.icon_button("sound",game.toggle_sound,"Toggle sound")
 	mute.tooltip_text = "Toggle sound"
 	game.mute_button = mute
 	row.add_child(mute)
-	row.add_child(UI.button("R",game.restart))
-	row.add_child(UI.button("II",game.toggle_pause))
-	var drawer_button = UI.button("...",game.toggle_tools)
+	row.add_child(UI.icon_button("restart",game.restart,"Restart (R)"))
+	row.add_child(UI.icon_button("pause",game.toggle_pause,"Pause (Esc)"))
+	var drawer_button = UI.icon_button("tools",game.toggle_tools,"Camera tools")
 	drawer_button.tooltip_text = "Camera, reset and settings"
 	row.add_child(drawer_button)
 	for control in row.get_children():

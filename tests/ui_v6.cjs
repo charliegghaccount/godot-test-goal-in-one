@@ -31,10 +31,11 @@ m.resize((im.width*2,im.height*2)).save(sys.argv[2])`,path,mask],{stdio:'ignore'
  };
  const captures=async(stage)=>{for(const [width,height] of sizes){await page.setViewportSize({width,height});await page.waitForTimeout(500);await shot(`${stage}-${width}`)}};
  await page.goto(url);await page.waitForTimeout(7000);
- assert.match(text(await shot('home-check')),/GOAL IN ONE/);
+ const homeText=text(await shot('home-check'));
+ assert.match(homeText,/GOAL/);assert.match(homeText,/LEVEL SELECT/);assert.match(homeText,/SETTINGS/);
  await captures('home');
  // Last capture is 740x360; the centered native menu has a fixed-height card.
- await page.mouse.click(370,242);await page.waitForTimeout(700);
+ await page.mouse.click(370,238);await page.waitForTimeout(700);
  await page.setViewportSize({width:1280,height:720});await page.waitForTimeout(700);
  assert.match(text(await shot('levels-check')),/GRASS[\s-]+PARKS/);
  await captures('levels');

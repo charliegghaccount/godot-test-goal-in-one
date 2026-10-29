@@ -1,0 +1,18 @@
+<!doctype html><html><head><style>html,body{margin:0;width:100%;height:100%;overflow:hidden}canvas{width:100%;height:100%;display:block}</style></head><body><canvas id="game"></canvas><script type="module">
+import {FootballSimulation} from '/src/simulation.ts';
+import {Renderer} from '/src/render.ts';
+import {levels} from '/src/levels.ts';
+import {grassParksImage} from '/src/background.ts';
+import {woodImage} from '/src/wood-material.ts';
+const p=new URLSearchParams(location.search),id=p.get('level')||'1';
+const level=/^\d+$/.test(id)?levels[+id-1]:(await (await fetch('/v7-fixtures/'+id+'.json')).json()).level;
+await Promise.all([grassParksImage.decode(),woodImage.decode()]);
+const sim=new FootballSimulation(level),r=new Renderer(document.querySelector('canvas'));
+r.render(sim,0,null); // establish the same initial parallax origin before stepping
+if(p.has('angle')){const a=+p.get('angle')*Math.PI/180;sim.shoot({x:-Math.cos(a)*(+(p.get('power')||140)),y:-Math.sin(a)*(+(p.get('power')||140))})}
+const ticks=+(p.get('ticks')||0);for(let i=0;i<ticks;i++){sim.step();r.render(sim,1/120,null)}
+if(p.has('zoom')){r.camera.zoomBy(+p.get('zoom'));r.camera.panBy(-(+p.get('panx')||0)*r.camera.scale,-(+p.get('pany')||0)*r.camera.scale)}
+r.render(sim,0,p.get('state')==='aim'?{x:-110,y:50}:null);
+window.parityState={ticks,ball:[sim.ball.position.x,sim.ball.position.y],camera:[r.camera.view.x+r.camera.view.w/2,r.camera.view.y+r.camera.view.h/2,r.scale],won:sim.phase==='won'};
+window.parityReady=true;
+</script></body></html>

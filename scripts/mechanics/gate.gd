@@ -24,6 +24,7 @@ var rest_position = Vector2.ZERO
 var wait_remaining = 0.0
 var collision: CollisionShape2D
 var ball: RigidBody2D
+@export var grass_edging = false
 var blocked = false
 
 func _ready():
@@ -75,17 +76,11 @@ func _physics_process(dt):
 	queue_redraw()
 
 func _draw():
-	var rect = Rect2(-dimensions/2,dimensions)
-	texture_repeat = CanvasItem.TEXTURE_REPEAT_MIRROR
-	var wood = preload("res://assets/wood.webp")
-	var density = wood.get_width()/256.0
-	draw_texture_rect_region(wood,rect,Rect2(rect.position*density,rect.size*density))
-	draw_rect(rect,Color("634129"),false,3)
-	for y in [-dimensions.y/2+10,dimensions.y/2-10]:
-		draw_rect(Rect2(-dimensions.x/2,y-4,dimensions.x,8),Color("64727d"))
-		for x in [-dimensions.x/2+6,dimensions.x/2-6]:
-			draw_circle(Vector2(x,y),2,Color("dde3e2"))
-	draw_circle(Vector2(0,0),4,Color("ffbb4a") if blocked else (Color("6cdc6b") if target_open else Color("a6b8be")))
+	preload("res://scripts/game_art.gd").rectangle(self,dimensions,grass_edging)
+	var rail = minf(9,dimensions.x*0.2)
+	for x in [-dimensions.x/2+rail/2,dimensions.x/2-rail/2]:
+		draw_line(Vector2(x,-dimensions.y/2),Vector2(x,dimensions.y/2),Color("414d5b"),rail,true)
+		for y in [-dimensions.y/2+9,dimensions.y/2-9]: preload("res://scripts/game_art.gd").bolt(self,Vector2(x,y),2.7)
 	if Engine.is_editor_hint():
 		var end = movement_direction.normalized()*travel_distance
 		draw_line(Vector2.ZERO,end,Color(1,0.9,0.4,0.7),2,true)

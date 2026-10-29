@@ -1,5 +1,7 @@
 extends RigidBody2D
 var net_capture = false
+var ice_contacts = {}
+var incoming_velocity = Vector2.ZERO
 signal hit
 signal kicked
 var hit_cooldown = 0.0
@@ -28,9 +30,7 @@ func _ready():
 	shape.shape = CircleShape2D.new()
 	shape.shape.radius = 16
 	add_child(shape)
-	var art = Sprite2D.new()
-	art.texture = preload("res://assets/football.svg")
-	art.scale = Vector2.ONE * 32.0 / art.texture.get_width()
+	var art = preload("res://scripts/ball_art.gd").new()
 	add_child(art)
 
 func shot_velocity(pull: Vector2) -> Vector2:
@@ -49,12 +49,16 @@ func kick(pull: Vector2):
 	support_remaining = 0.0
 	linear_velocity = shot_velocity(pull)
 	angular_velocity = clampf(angular_velocity * 0.2 - pull.limit_length(140).x * 0.03, -21, 21)
+	incoming_velocity = linear_velocity
 	kicked.emit()
 	return true
 
 func _integrate_forces(state: PhysicsDirectBodyState2D):
 	hit_cooldown = maxf(0,hit_cooldown-state.step)
 	for i in state.get_contact_count():
+		var collider = state.get_contact_collider_object(i)
+		if is_instance_valid(collider) and collider.has_method("impact"):
+			collider.impact(absf((incoming_velocity-state.get_contact_collider_velocity_at_position(i)).dot(state.get_contact_local_normal(i))))
 		if state.get_contact_impulse(i).length()>50 and hit_cooldown==0:
 			hit.emit.call_deferred()
 			hit_cooldown = 0.09
@@ -71,13 +75,18 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 		var supported = support_remaining > 0 and absf(relative.dot(support_normal)) < 60
 		physics_material_override.bounce = 0.0 if supported else 0.76
 		physics_material_override.friction = (0.35 if absf(relative.x)<320 else 0.04) if supported else 0.003
+		var ice_scale = 1.0
+		for value in ice_contacts.values(): ice_scale = minf(ice_scale,float(value)/0.003)
+		if ice_scale<1: physics_material_override.friction = 0.003*ice_scale
 		# Suppress the long low-speed tail without changing flight or high-speed shots.
 		# Brief support hysteresis avoids re-enabling bounce between resting contacts.
 		if supported:
 			var tangent = Vector2(-support_normal.y,support_normal.x)
 			var speed = relative.dot(tangent)
 			if absf(speed) < 320:
-				state.linear_velocity += tangent*(move_toward(speed,0,110*state.step)-speed)
+				state.linear_velocity += tangent*(move_toward(speed,0,110*ice_scale*state.step)-speed)
 	if net_capture:
 		state.linear_velocity *= Vector2(pow(0.95,state.step*120),pow(0.97,state.step*120))
 		physics_material_override.bounce = 0.08
+
+	incoming_velocity = state.linear_velocity
