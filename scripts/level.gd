@@ -11,6 +11,9 @@ extends Node2D
 		queue_redraw()
 @export_enum("Fit arena", "Follow ball") var camera_mode: int = 0
 @export_range(0.3, 2) var follow_zoom: float = 1.0
+@export var camera_origin: Vector2 = Vector2.ZERO
+@export var follow_vertical: bool = true
+@export var camera_speed: float = 6.0
 @export var gravity: float = 1100.0
 @export var background: Texture2D = preload("res://assets/park.webp")
 

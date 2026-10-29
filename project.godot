@@ -20,3 +20,6 @@ pointing/emulate_mouse_from_touch=true
 
 [editor_plugins]
 enabled=PackedStringArray("res://addons/level_studio/plugin.cfg")
+
+[autoload]
+StudioBridge="*res://scripts/studio_bridge.gd"

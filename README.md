@@ -1,6 +1,8 @@
-# Goal In One — Godot V3
+# Goal In One — Godot V4
 
 Native Godot 4 / GDScript football puzzle prototype with a visual level-authoring foundation. Standard Godot **4.6.3** is tested and pinned in the web workflow; no .NET or application secrets are needed.
+
+**Primary level-design workflow:** use the original [Web Level Studio](https://charliegghaccount.github.io/goal-in-one-test/) and its **Test in Godot** button. See [the integration guide](docs/WEB_STUDIO.md). Native scene editing remains optional.
 
 **Interactive mechanics:** forward/backward boosts, reset strip, spring, directional fan, pressure switches and moving gates are reusable scenes with Inspector controls. Three editable experimental levels demonstrate their combinations. See [mechanic design notes](docs/MECHANICS.md).
 
@@ -24,6 +26,7 @@ Drag backwards anywhere outside the HUD; release to kick. Unlimited kicks work i
 godot --headless --editor --import --quit
 godot --headless --script res://tests/runtime.gd
 godot --headless --script res://tests/mechanics.gd
+godot --headless --script res://tests/import.gd
 mkdir -p build/web
 godot --headless --export-release Web build/web/index.html
 python3 -m http.server 8000 --directory build/web

@@ -15,6 +15,7 @@ extends AnimatableBody2D
 		travel_distance = value
 		queue_redraw()
 @export_range(10,1000,5) var movement_speed: float = 180.0
+@export var closing_speed: float = 0.0
 @export var automatic: bool = false
 @export_range(0,10,0.1) var endpoint_wait: float = 0.8
 var target_open = false
@@ -50,7 +51,7 @@ func _physics_process(dt):
 	if wait_remaining > 0:
 		wait_remaining = maxf(0,wait_remaining-dt)
 		return
-	var next = move_toward(progress,1.0 if target_open else 0.0,movement_speed*dt/maxf(travel_distance,1))
+	var next = move_toward(progress,1.0 if target_open else 0.0,(movement_speed if target_open or closing_speed<=0 else closing_speed)*dt/maxf(travel_distance,1))
 	var next_position = rest_position+movement_direction.normalized().rotated(rotation)*travel_distance*next
 	blocked = false
 	# Stop before crushing the ball. Full-shape sweeps prevent tunnelling even at high speed.

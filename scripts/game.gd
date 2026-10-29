@@ -17,6 +17,7 @@ var message: Label
 var panel: PanelContainer
 var camera: Camera2D
 var best = 0
+var studio_test = false
 const FLOOR = 628.13632
 
 var level_override: Node2D
@@ -31,6 +32,9 @@ var spawn_point = Vector2.ZERO
 var active_path = "res://levels/green_runway.tscn"
 
 func _ready():
+	if StudioBridge.active and not studio_test:
+		StudioBridge.waiting(self)
+		return
 	level_paths = discover_levels()
 	if is_instance_valid(level_override):
 		level = level_override
@@ -44,11 +48,11 @@ func _ready():
 		return
 	spawn_point = level.get_node("Spawn").global_position
 	var save = ConfigFile.new()
-	if save.load("user://progress.cfg") == OK: best = save.get_value(level.level_id,"best",0)
+	if not studio_test and save.load("user://progress.cfg") == OK: best = save.get_value(level.level_id,"best",0)
 	var background = Sprite2D.new()
 	background.z_index = -100
 	background.texture = level.background
-	background.position = level.level_size/2
+	background.position = level.camera_origin+level.level_size/2
 	background.scale = level.level_size / Vector2(background.texture.get_size())
 	add_child(background)
 	camera = Camera2D.new()
@@ -86,7 +90,7 @@ func frame_camera():
 	if level.camera_mode == 0:
 		var screen = get_viewport_rect().size
 		camera.zoom = Vector2.ONE * minf(screen.x/level.level_size.x,screen.y/level.level_size.y)
-		camera.position = level.level_size/2
+		camera.position = level.camera_origin+level.level_size/2
 	else:
 		camera.zoom = Vector2.ONE * level.follow_zoom
 		camera.position = bounded_camera(ball.position)
@@ -94,7 +98,9 @@ func frame_camera():
 func bounded_camera(at: Vector2) -> Vector2:
 	var half = get_viewport_rect().size / camera.zoom / 2
 	var size = level.level_size
-	return Vector2(size.x/2 if size.x < half.x*2 else clampf(at.x,half.x,size.x-half.x),size.y/2 if size.y < half.y*2 else clampf(at.y,half.y,size.y-half.y))
+	var origin = level.camera_origin
+	if not level.follow_vertical: at.y = spawn_point.y
+	return Vector2(origin.x+size.x/2 if size.x<half.x*2 else clampf(at.x,origin.x+half.x,origin.x+size.x-half.x),origin.y+size.y/2 if size.y<half.y*2 else clampf(at.y,origin.y+half.y,origin.y+size.y-half.y))
 
 func reset_ball():
 	if won:
@@ -152,6 +158,7 @@ func build_hud():
 	hud.add_theme_font_size_override("font_size",19)
 	hud.add_theme_color_override("font_color",Color("fff3cf"))
 	row.add_child(hud)
+	if studio_test: row.add_child(button("Return",StudioBridge.return_to_editor))
 	row.add_child(button("Restart",restart))
 	row.add_child(button("Pause",toggle_pause))
 	row.add_child(button("Reset ball",reset_ball))
@@ -168,6 +175,7 @@ func build_hud():
 		if path == level.scene_file_path: level_picker.select(level_picker.item_count-1)
 	level_picker.item_selected.connect(func(index): load_level(level_paths[index]))
 	layer.add_child(level_picker)
+	level_picker.visible = not studio_test
 	var tip = Label.new()
 	controls_hint = tip
 	tip.text = "Drag anywhere to kick • Explore: drag to pan / wheel to zoom • R restart"
@@ -198,6 +206,9 @@ func refresh():
 	hud.text = "%s   •   SHOTS %d   /   PAR %d   /   BEST %s" % [level.level_name,shots,level.par,str(best) if best else "—"]
 
 func restart():
+	if studio_test:
+		StudioBridge.receive([StudioBridge.last_json])
+		return
 	load_level(level.scene_file_path)
 
 func toggle_pause():
@@ -220,7 +231,7 @@ func complete():
 	best = shots if best == 0 else mini(best,shots)
 	var save = ConfigFile.new()
 	save.set_value(level.level_id,"best",best)
-	save.save("user://progress.cfg")
+	if not studio_test: save.save("user://progress.cfg")
 	message.text = "GOAL!   " + "★".repeat(stars) + "☆".repeat(3-stars) + "
 %d shots  •  Par %d" % [shots,level.par]
 	panel.show()
@@ -271,10 +282,10 @@ func _unhandled_input(event):
 func _process(dt):
 	if not is_instance_valid(ball): return
 	if level.camera_mode == 1 and not exploring:
-		camera.position = camera.position.lerp(bounded_camera(ball.position),1-exp(-dt*6))
+		camera.position = camera.position.lerp(bounded_camera(ball.position),1-exp(-dt*level.camera_speed))
 	elif level.camera_mode == 0 and not exploring: frame_camera()
 	if aiming: queue_redraw()
-	if ball.position.y > level.level_size.y+150 and not paused: reset_ball()
+	if ball.position.y > level.camera_origin.y+level.level_size.y+150 and not paused: reset_ball()
 
 func _draw():
 	if not aiming or not is_instance_valid(ball) or pull.length()<6: return

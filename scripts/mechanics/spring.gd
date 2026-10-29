@@ -1,6 +1,8 @@
 @tool
 extends "res://scripts/mechanics/area.gd"
 ## The local UP axis launches the ball; rotate this node to aim.
+@export var local_launch_direction: Vector2 = Vector2.UP
+@export var visual_height: float = 0.0
 @export_range(100,1440,10) var launch_speed: float = 1200.0
 @export_range(0,1,0.05) var momentum_retention: float = 0.2
 @export_range(0.05,1,0.01) var retrigger_delay: float = 0.18
@@ -12,7 +14,7 @@ func activate():
 	cooldown = retrigger_delay
 	compression = 1.0
 	ball.sleeping = false
-	ball.linear_velocity = ball.linear_velocity*momentum_retention + Vector2.UP.rotated(global_rotation)*launch_speed
+	ball.linear_velocity = ball.linear_velocity*momentum_retention + local_launch_direction.normalized().rotated(global_rotation)*launch_speed
 	feedback("spring")
 
 func _physics_process(dt):
@@ -23,7 +25,7 @@ func _physics_process(dt):
 
 func _draw():
 	var w = dimensions.x
-	var h = dimensions.y
+	var h = maxf(dimensions.y,visual_height)
 	plate(Rect2(-w/2,h/2-7,w,7),Color("525c67"))
 	var top = -h/2+compression*(h-14)
 	var coil = PackedVector2Array()
