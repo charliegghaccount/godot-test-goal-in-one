@@ -18,7 +18,7 @@ func run():
 	DirAccess.remove_absolute(SAVE)
 	var game = spawn("res://comparison/levels/L01.json")
 	await physics_frame
-	check(game.sound.announcements_enabled,"V6 announcer recordings available")
+	check(not game.sound.announcements_enabled,"spoken announcer lines disabled")
 	check(game.next_level_path().ends_with("L02.json"),"first canonical level advances in order")
 	game.shots = 1
 	game.complete()

@@ -1,7 +1,7 @@
 extends Node
 var muted = false
-# V6 preserves the approved recordings and original selection rules.
-var announcements_enabled = true
+# Spoken announcer lines are paused at the user's request; retain assets for later.
+var announcements_enabled = false
 var voice: AudioStreamPlayer
 var last_effect = {}
 static func announcement_for(shots: int, par: int, thresholds: Vector2i) -> String:

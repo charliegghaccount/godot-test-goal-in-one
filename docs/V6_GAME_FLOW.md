@@ -40,3 +40,5 @@ Physical iPhone/Android, Safari, notch/system safe areas, audible recording leve
 - The unchanged TypeScript Studio integration passed basic/mechanics/wide draft round trips, native Return to Editor, geometry/workspace/progress preservation, repeated tests, undo/redo, and unsupported-object error handling. Its locked dependencies and dev server were prepared in a temporary reference checkout; no Vite source changes were made.
 
 These are local validations, not a Pages deployment or mobile-hardware sign-off. See ignored `build/v6-evidence` for the original captures and contact sheets. Browser OCR assertions require Python Pillow as well as Tesseract; cream-letter filtering prevents timber/park texture from confusing recognition.
+
+Publication correction: spoken announcer lines are disabled again at the user's request. Assets and selection rules remain for later; gameplay sound effects remain enabled. This supersedes the voice reactivation described above.
