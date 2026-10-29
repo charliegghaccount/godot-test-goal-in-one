@@ -12,6 +12,8 @@ signal scored
 var ball: RigidBody2D
 var previous = Vector2.ZERO
 var initialized = false
+var scored_once = false
+var net_flash = 0.0
 var frame_body: StaticBody2D
 
 func _ready():
@@ -27,6 +29,9 @@ func _rebuild():
 		remove_child(frame_body)
 		frame_body.queue_free()
 	frame_body = StaticBody2D.new()
+	frame_body.disable_mode = CollisionObject2D.DISABLE_MODE_KEEP_ACTIVE
+	frame_body.collision_layer = 1
+	frame_body.collision_mask = 2
 	add_child(frame_body)
 	var points = frame_points()
 	for i in range(3):
@@ -48,7 +53,12 @@ func _physics_process(_dt):
 	if Engine.is_editor_hint() or not is_instance_valid(ball): return
 	var current = to_local(ball.global_position)
 	var radius = 16.0 / maxf(absf(global_scale.x),0.01)
-	if initialized and valid_crossing(previous,current,radius): scored.emit()
+	net_flash = maxf(0,net_flash-_dt*1.5)
+	if initialized and not scored_once and valid_crossing(previous,current,radius):
+		scored_once = true
+		net_flash = 1.0
+		scored.emit()
+	queue_redraw()
 	previous = current
 	initialized = true
 
@@ -59,9 +69,9 @@ func _draw():
 	# No polygon fill, fourth frame edge, or net strand along x=0: entrance stays open.
 	for y in range(-int(h)+12,-5,12):
 		var right = roof + (y+h)/h*(w-roof)
-		draw_line(Vector2(12,y),Vector2(right,y),Color(1,1,1,0.45),1,true)
+		draw_line(Vector2(12,y),Vector2(right,y),Color(1,1,1,0.45+net_flash*0.5),1,true)
 	for x in range(12,int(w)-5,12):
 		var top = -h if x < roof else -(w-x)/(w-roof)*h
-		draw_line(Vector2(x,top),Vector2(x,-5),Color(1,1,1,0.45),1,true)
+		draw_line(Vector2(x,top),Vector2(x,-5),Color(1,1,1,0.45+net_flash*0.5),1,true)
 	draw_polyline(frame_points(),Color("54636c"),11,true)
 	draw_polyline(frame_points(),Color("f7fcff"),7,true)

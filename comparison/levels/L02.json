@@ -1,0 +1,75 @@
+{
+  "format": "goal-in-one-level",
+  "version": 1,
+  "draftId": "comparison-L02",
+  "modified": "2026-10-29T00:00:00Z",
+  "difficulty": 2,
+  "tags": [
+    "comparison"
+  ],
+  "level": {
+    "id": 2,
+    "name": "Up the ramp",
+    "tip": "A solid rising triangle sits below the peaked roof. Use its slope or clear its tall end.",
+    "par": 1,
+    "starShots": [
+      1,
+      3
+    ],
+    "width": 1280,
+    "start": {
+      "x": 112,
+      "y": 606.13632
+    },
+    "goal": {
+      "x": 1091.0176,
+      "y": 628.13632,
+      "w": 135.48640000000015,
+      "h": 107.65631999999997,
+      "roof": 79.53760000000003
+    },
+    "outline": [
+      {
+        "x": 57.50864,
+        "y": 628.13632
+      },
+      {
+        "x": 57.50864,
+        "y": 409.12
+      },
+      {
+        "x": 164,
+        "y": 302.20688
+      },
+      {
+        "x": 643.408,
+        "y": 92.976
+      },
+      {
+        "x": 1092.32336,
+        "y": 520.48
+      }
+    ],
+    "obstacles": [
+      {
+        "id": "rising-triangle",
+        "points": [
+          {
+            "x": 241.42976,
+            "y": 628.13632
+          },
+          {
+            "x": 564.42832,
+            "y": 462.93632
+          },
+          {
+            "x": 564.42832,
+            "y": 628.13632
+          }
+        ]
+      }
+    ],
+    "surfaces": [],
+    "movers": []
+  }
+}

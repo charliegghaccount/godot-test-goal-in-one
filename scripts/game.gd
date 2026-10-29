@@ -8,12 +8,17 @@ var goal: Area2D
 var boost: Area2D
 var shots = 0
 var won = false
+var scoring = false
+var sound: Node
+var trail = PackedVector2Array()
+var score_time = 0.0
 var paused = false
 var aiming = false
 var drag_start = Vector2.ZERO
 var pull = Vector2.ZERO
 var hud: Label
 var message: Label
+var rating_view: Control
 var panel: PanelContainer
 var camera: Camera2D
 var best = 0
@@ -29,7 +34,7 @@ var explore_button: Button
 var controls_hint: Label
 var camera_drag = false
 var spawn_point = Vector2.ZERO
-var active_path = "res://levels/green_runway.tscn"
+var active_path = "res://comparison/levels/L01.json"
 
 func _ready():
 	if StudioBridge.active and not studio_test:
@@ -38,9 +43,17 @@ func _ready():
 	level_paths = discover_levels()
 	if is_instance_valid(level_override):
 		level = level_override
+		if not level.scene_file_path.is_empty(): active_path = level.scene_file_path
 	else:
 		active_path = get_meta("level_path", active_path)
-		level = load(active_path).instantiate()
+		if OS.has_feature("web") and not has_meta("level_path"):
+			var requested = str(JavaScriptBridge.eval("new URLSearchParams(location.search).get('level') || ''"))
+			if requested.is_valid_int() and int(requested)>=1 and int(requested)<=20: active_path="res://comparison/levels/L%02d.json"%int(requested)
+		if active_path.ends_with(".json"):
+			var result = preload("res://scripts/studio_import.gd").new().parse(FileAccess.get_file_as_string(active_path))
+			if not result.errors.is_empty(): push_error(str(result.errors)); return
+			level = result.level
+		else: level = load(active_path).instantiate()
 		add_child(level)
 	var errors = level.problems()
 	if not errors.is_empty():
@@ -49,12 +62,6 @@ func _ready():
 	spawn_point = level.get_node("Spawn").global_position
 	var save = ConfigFile.new()
 	if not studio_test and save.load("user://progress.cfg") == OK: best = save.get_value(level.level_id,"best",0)
-	var background = Sprite2D.new()
-	background.z_index = -100
-	background.texture = level.background
-	background.position = level.camera_origin+level.level_size/2
-	background.scale = level.level_size / Vector2(background.texture.get_size())
-	add_child(background)
 	camera = Camera2D.new()
 	add_child(camera)
 	ball = BALL.instantiate()
@@ -63,13 +70,24 @@ func _ready():
 	add_child(ball)
 	goal = level.get_node("Goal")
 	goal.ball = ball
-	goal.scored.connect(complete)
+	goal.scored.connect(begin_scoring)
 	for object in level.find_children("*", "Node2D", true, false):
 		if object.has_method("bind_game"):
 			object.bind_game(self)
 			if object.get_script() == preload("res://scripts/boost.gd"): boost = object
+	sound = preload("res://scripts/game_audio.gd").new()
+	add_child(sound)
+	ball.hit.connect(func(): mechanic_feedback("hit",ball.position))
+	ball.kicked.connect(func(): mechanic_feedback("shot",ball.position))
 	build_hud()
 	frame_camera()
+	var backdrop = CanvasLayer.new()
+	backdrop.layer = -10
+	add_child(backdrop)
+	var park = preload("res://scripts/park_background.gd").new()
+	park.camera = camera
+	park.reference = camera.position
+	backdrop.add_child(park)
 	refresh()
 
 func discover_levels() -> PackedStringArray:
@@ -77,7 +95,11 @@ func discover_levels() -> PackedStringArray:
 	for filename in ResourceLoader.list_directory("res://levels"):
 		if filename.ends_with(".tscn"): paths.append("res://levels/"+filename)
 	paths.sort()
-	return paths
+	var comparison = PackedStringArray()
+	for filename in ResourceLoader.list_directory("res://comparison/levels"):
+		if filename.ends_with(".json"): comparison.append("res://comparison/levels/"+filename)
+	comparison.sort()
+	return comparison+paths
 
 func load_level(path: String):
 	var next = load("res://scenes/main.tscn").instantiate()
@@ -107,6 +129,10 @@ func reset_ball():
 		restart()
 		return
 	aiming = false
+	scoring = false
+	score_time = 0
+	ball.net_capture = false
+	goal.scored_once = false
 	for object in level.find_children("*", "Area2D", true, false):
 		if object.has_method("reset_contact"): object.reset_contact()
 	PhysicsServer2D.body_set_state(ball.get_rid(),PhysicsServer2D.BODY_STATE_TRANSFORM,Transform2D(0,spawn_point))
@@ -134,7 +160,7 @@ func wood_style() -> StyleBoxTexture:
 func button(text: String, action: Callable) -> Button:
 	var b = Button.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(105,48)
+	b.custom_minimum_size = Vector2(90,48)
 	b.add_theme_font_size_override("font_size",20)
 	b.add_theme_stylebox_override("normal",wood_style())
 	b.add_theme_color_override("font_color",Color("fff1cf"))
@@ -161,6 +187,9 @@ func build_hud():
 	if studio_test: row.add_child(button("Return",StudioBridge.return_to_editor))
 	row.add_child(button("Restart",restart))
 	row.add_child(button("Pause",toggle_pause))
+	var mute = button("Mute",func(): sound.toggle())
+	mute.pressed.connect(func(): mute.text="Sound off" if sound.muted else "Mute")
+	row.add_child(mute)
 	row.add_child(button("Reset ball",reset_ball))
 	explore_button = button("Explore",toggle_explore)
 	row.add_child(explore_button)
@@ -172,7 +201,7 @@ func build_hud():
 	level_picker.position = Vector2(24,660)
 	for path in level_paths:
 		level_picker.add_item(path.get_file().get_basename().capitalize())
-		if path == level.scene_file_path: level_picker.select(level_picker.item_count-1)
+		if path == active_path: level_picker.select(level_picker.item_count-1)
 	level_picker.item_selected.connect(func(index): load_level(level_paths[index]))
 	layer.add_child(level_picker)
 	level_picker.visible = not studio_test
@@ -197,6 +226,9 @@ func build_hud():
 	message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	message.add_theme_font_size_override("font_size",30)
 	column.add_child(message)
+	rating_view = preload("res://scripts/rating_stars.gd").new()
+	rating_view.custom_minimum_size = Vector2(0,55)
+	column.add_child(rating_view)
 	column.add_child(button("Continue / Play again",func():
 		if won: restart()
 		else: toggle_pause()))
@@ -209,32 +241,57 @@ func restart():
 	if studio_test:
 		StudioBridge.receive([StudioBridge.last_json])
 		return
-	load_level(level.scene_file_path)
+	load_level(active_path)
 
 func toggle_pause():
 	if won: return
 	paused = not paused
 	ball.freeze = paused
-	level.process_mode = Node.PROCESS_MODE_DISABLED if paused else Node.PROCESS_MODE_INHERIT
+	goal.set_physics_process(not paused)
+	# Stop actuators, never remove CollisionObject2D bodies from the physics world.
+	for object in level.find_children("*","Node2D",true,false):
+		if object.has_method("bind_game"): object.set_physics_process(not paused)
 	aiming = false
 	message.text = "HALF TIME
 Ready for another shot?"
+	rating_view.visible = false
 	panel.visible = paused
 	queue_redraw()
+
+func begin_scoring():
+	if won or scoring or shots==0: return
+	scoring = true
+	score_time = 0
+	aiming = false
+	ball.net_capture = true
+	mechanic_feedback("net",ball.position)
+
+func _physics_process(dt):
+	if scoring and not paused:
+		score_time += dt
+		if score_time >= 0.65:
+			scoring = false
+			complete()
 
 func complete():
 	if won or shots == 0: return
 	won = true
-	level.process_mode = Node.PROCESS_MODE_DISABLED
+	# Stop actuators, never remove CollisionObject2D bodies from the physics world.
+	for object in level.find_children("*","Node2D",true,false):
+		if object.has_method("bind_game"): object.set_physics_process(false)
 	aiming = false
 	var stars = 3 if shots <= level.star_shots.x else (2 if shots <= level.star_shots.y else 1)
 	best = shots if best == 0 else mini(best,shots)
 	var save = ConfigFile.new()
 	save.set_value(level.level_id,"best",best)
 	if not studio_test: save.save("user://progress.cfg")
-	message.text = "GOAL!   " + "★".repeat(stars) + "☆".repeat(3-stars) + "
-%d shots  •  Par %d" % [shots,level.par]
+	message.text = ("GOAL IN ONE!   " if shots==1 else "GOAL!   ") + "
+%d %s  •  Par %d" % [shots,"shot" if shots==1 else "shots",level.par]
+	rating_view.visible = true
+	rating_view.count = stars
+	rating_view.queue_redraw()
 	panel.show()
+	sound.announce(shots,level.par,level.star_shots)
 	refresh()
 	queue_redraw()
 
@@ -245,7 +302,7 @@ func _input(event):
 		queue_redraw()
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		camera_drag = false
-		if aiming and not paused and not won:
+		if aiming and not paused and not won and not scoring:
 			aiming = false
 			if ball.kick(pull): shots += 1
 			refresh()
@@ -256,7 +313,7 @@ func _unhandled_input(event):
 		if event.keycode == KEY_R: restart()
 		if event.keycode == KEY_ESCAPE: toggle_pause()
 		if event.keycode == KEY_E: toggle_explore()
-	if paused or won: return
+	if paused or won or scoring: return
 	if exploring:
 		if event is InputEventMouseButton:
 			if event.button_index == MOUSE_BUTTON_LEFT: camera_drag = event.pressed
@@ -284,10 +341,16 @@ func _process(dt):
 	if level.camera_mode == 1 and not exploring:
 		camera.position = camera.position.lerp(bounded_camera(ball.position),1-exp(-dt*level.camera_speed))
 	elif level.camera_mode == 0 and not exploring: frame_camera()
-	if aiming: queue_redraw()
+	if ball.linear_velocity.length()>100:
+		trail.append(ball.position)
+		if trail.size()>18: trail.remove_at(0)
+	elif not trail.is_empty(): trail.remove_at(0)
+	queue_redraw()
 	if ball.position.y > level.camera_origin.y+level.level_size.y+150 and not paused: reset_ball()
 
 func _draw():
+	for i in range(1,trail.size()):
+		draw_line(trail[i-1],trail[i],Color(1,1,1,float(i)/trail.size()*0.18),3,true)
 	if not aiming or not is_instance_valid(ball) or pull.length()<6: return
 	var pos = ball.position
 	var velocity = ball.shot_velocity(pull)
@@ -298,24 +361,35 @@ func _draw():
 	query.shape = circle
 	query.exclude = [ball.get_rid()]
 	query.collision_mask = 1
-	var count = int(lerpf(12,48,pull.length()/140))
-	for i in count:
-		var step = velocity * 0.025
+	var spacing = 14.0/camera.zoom.x
+	var next_dot = spacing
+	var distance = 0.0
+	var dots = 0
+	for i in range(100):
+		var before = pos
+		var step = velocity / 120.0
 		query.transform = Transform2D(0,pos)
 		query.motion = step
 		var fraction = space.cast_motion(query)
 		if fraction[0] < 1.0:
 			pos += step*fraction[0]
-			query.transform.origin = pos + step.normalized()*0.25
+			query.transform.origin = before+step*fraction[1]
 			query.motion = Vector2.ZERO
 			var rest = space.get_rest_info(query)
 			if rest.is_empty(): break
 			velocity = velocity.bounce(rest.normal)*0.76
-			pos += rest.normal*0.6
+			pos += rest.normal*0.3
 		else: pos += step
-		velocity.y += level.gravity * 0.025
-		velocity *= 0.99775
-		draw_circle(pos,2.8,Color(1,0.97,0.75,0.8*(1.0-float(i)/(count+2))))
+		var length = before.distance_to(pos)
+		while distance+length>=next_dot and dots<50:
+			var at = before.lerp(pos,(next_dot-distance)/maxf(length,0.001))
+			draw_circle(at,2.7/camera.zoom.x,Color(1,0.97,0.75,0.85*(1.0-dots/52.0)))
+			next_dot += spacing
+			dots += 1
+		distance += length
+		velocity *= 0.99925
+		velocity.y += level.gravity/120.0
+		if dots>=50: break
 
 func mechanic_feedback(kind: String, at: Vector2):
 	var ring = Node2D.new()
@@ -330,21 +404,4 @@ func mechanic_feedback(kind: String, at: Vector2):
 	tween.tween_property(ring,"scale",Vector2(2,2),0.35)
 	tween.tween_property(ring,"modulate:a",0.0,0.35)
 	tween.chain().tween_callback(ring.queue_free)
-	var sound = AudioStreamPlayer.new()
-	var wav = AudioStreamWAV.new()
-	wav.format = AudioStreamWAV.FORMAT_16_BITS
-	wav.mix_rate = 22050
-	var data = PackedByteArray()
-	var duration = 0.16
-	var samples = int(duration*wav.mix_rate)
-	data.resize(samples*2)
-	for i in samples:
-		var t = float(i)/wav.mix_rate
-		var frequency = lerpf(440,150,t/duration) if kind == "reset" else lerpf(400,850,t/duration)
-		data.encode_s16(i*2,int(sin(TAU*frequency*t)*6000*(1.0-t/duration)))
-	wav.data = data
-	sound.stream = wav
-	sound.volume_db = -10
-	add_child(sound)
-	sound.finished.connect(sound.queue_free)
-	sound.play()
+	if is_instance_valid(sound): sound.effect(kind)

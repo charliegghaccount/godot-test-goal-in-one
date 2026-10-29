@@ -76,7 +76,10 @@ func _physics_process(dt):
 
 func _draw():
 	var rect = Rect2(-dimensions/2,dimensions)
-	draw_texture_rect(preload("res://assets/wood.webp"),rect,true)
+	texture_repeat = CanvasItem.TEXTURE_REPEAT_MIRROR
+	var wood = preload("res://assets/wood.webp")
+	var density = wood.get_width()/256.0
+	draw_texture_rect_region(wood,rect,Rect2(rect.position*density,rect.size*density))
 	draw_rect(rect,Color("634129"),false,3)
 	for y in [-dimensions.y/2+10,dimensions.y/2-10]:
 		draw_rect(Rect2(-dimensions.x/2,y-4,dimensions.x,8),Color("64727d"))

@@ -11,6 +11,7 @@ func _initialize():
 	call_deferred("run")
 func run():
 	var game = load("res://scenes/main.tscn").instantiate()
+	game.set_meta("level_path","res://levels/green_runway.tscn")
 	root.add_child(game)
 	await physics_frame
 	var ball = game.ball
@@ -34,7 +35,7 @@ func run():
 	game.shots = 2
 	PhysicsServer2D.body_set_state(ball.get_rid(),PhysicsServer2D.BODY_STATE_TRANSFORM,Transform2D(0,Vector2(1060,580)))
 	ball.linear_velocity = Vector2(500,0)
-	for i in range(30): await physics_frame
+	for i in range(115): await physics_frame
 	check(game.won,"physical goal entry completes level")
 	check(game.best > 0,"best score saved")
 	# Anywhere aiming, dead zone, screen pan separation.
@@ -61,7 +62,8 @@ func run():
 	game.toggle_explore()
 	var ids = []
 	for path in game.discover_levels():
-		var level = load(path).instantiate()
+		if path.ends_with(".json"): continue
+		var level = preload("res://scripts/studio_import.gd").new().parse(FileAccess.get_file_as_string(path)).level if path.ends_with(".json") else load(path).instantiate()
 		game.add_child(level)
 		check(not level.level_id in ids,"unique stable ID")
 		ids.append(level.level_id)

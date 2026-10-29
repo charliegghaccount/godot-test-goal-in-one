@@ -32,15 +32,21 @@ func polygon(value: Variant) -> PackedVector2Array:
 	return result
 func prefab(name: String) -> Node2D:
 	return load("res://scenes/"+name+".tscn").instantiate()
-func wood(level: Node, points: PackedVector2Array, grass: bool):
+func wood(level: Node, points: PackedVector2Array, grass: bool, grain_angle: float = 0.0):
 	var node = prefab("timber")
 	node.polygon = points
+	node.texture_rotation = grain_angle
 	node.grass_edging = grass
 	level.add_child(node)
 func beam(level: Node,a: Vector2,b: Vector2,grass: bool):
 	if a.distance_to(b)<0.01: return
 	var n = (b-a).normalized().orthogonal()*5.2
-	wood(level,PackedVector2Array([a+n,b+n,b-n,a-n]),grass and absf(a.y-b.y)<0.1)
+	var node = prefab("timber")
+	node.polygon = PackedVector2Array([a+n,b+n,b-n,a-n])
+	node.texture_rotation = (b-a).angle()
+	node.seam_points = PackedVector2Array([a,b])
+	node.grass_edging = grass and absf(a.y-b.y)<0.1
+	level.add_child(node)
 func parse(text: String) -> Dictionary:
 	errors.clear()
 	if text.length()>2000000: return {"errors":["Level exceeds 2 MB limit"]}
@@ -91,7 +97,7 @@ func parse(text: String) -> Dictionary:
 				var top = goal.position-Vector2(0,height)
 				beam(level,a,top if a.y<b.y else goal.position,false)
 				beam(level,goal.position if a.y<b.y else top,b,false)
-			else: beam(level,a,b,d.get("grass",true)==true)
+			else: beam(level,a,b,d.get("grass",true)==true and has_boundary and a.x>b.x)
 		if not has_boundary:
 			beam(level,edge[-1],goal.position-Vector2(0,height),false)
 			beam(level,edge[0],goal.position+Vector2(width,0),d.get("grass",true)==true)
@@ -100,7 +106,7 @@ func parse(text: String) -> Dictionary:
 		if o.has("grass") and not o.grass is bool:
 			errors.append("Object grass must be boolean")
 			continue
-		wood(level,polygon(o.get("points")),o.get("grass",true))
+		wood(level,polygon(o.get("points")),o.get("grass",true),number(o,"rotation",0))
 	for s in objects(d,"surfaces"):
 		var kind = s.get("kind","")
 		if not kind in ["forward","backward","delete"]: errors.append("Unsupported surface: "+str(kind)); continue
@@ -116,7 +122,23 @@ func parse(text: String) -> Dictionary:
 	if not mechanics is Dictionary: mechanics = {}; errors.append("Invalid mechanics")
 	for key in mechanics:
 		if not key in ["springs","gates","switches"] and mechanics[key]!=[]: errors.append("Unsupported mechanic: "+str(key))
-	if not objects(d,"movers").is_empty(): errors.append("Unsupported: moving blocks")
+	for m in objects(d,"movers"):
+		var node = prefab("mover")
+		node.position = point(m)
+		node.dimensions = Vector2(number(m,"w",40,12,10000),number(m,"h",160,12,10000))
+		node.travel = number(m,"travel",89,0,10000)
+		node.period = number(m,"period",8,0.1,1000)
+		node.axis = 1 if m.get("axis", "y")=="x" else 0
+		node.rotation = number(m,"angle",0)
+		if m.has("path"):
+			if m.path is Dictionary:
+				node.use_path = true
+				node.path_start = point(m.path.get("start"))
+				node.path_end = point(m.path.get("end"))
+				node.once = m.get("loop", "ping-pong")=="once"
+				node.phase = number(m,"phase",0)
+			else: errors.append("Invalid mover path")
+		level.add_child(node)
 	for s in objects(mechanics,"springs"):
 		var node = prefab("spring")
 		var w = number(s,"w",90,8,10000)

@@ -1,0 +1,62 @@
+{
+  "format": "goal-in-one-level",
+  "version": 1,
+  "draftId": "comparison-L09",
+  "modified": "2026-10-29T00:00:00Z",
+  "difficulty": 2,
+  "tags": [
+    "comparison"
+  ],
+  "level": {
+    "id": 9,
+    "name": "Moving target",
+    "tip": "The block slowly travels from floor to ceiling. Pick your moment or adjust a moving ball.",
+    "par": 1,
+    "starShots": [
+      1,
+      3
+    ],
+    "width": 1280,
+    "start": {
+      "x": 200,
+      "y": 606.13632
+    },
+    "goal": {
+      "x": 1091.0176,
+      "y": 628.13632,
+      "w": 135.48640000000015,
+      "h": 107.65631999999997,
+      "roof": 79.53760000000003
+    },
+    "outline": [
+      {
+        "x": 57.50864,
+        "y": 628.13632
+      },
+      {
+        "x": 57.50864,
+        "y": 276.33232
+      },
+      {
+        "x": 1092.32336,
+        "y": 276.33232
+      },
+      {
+        "x": 1092.32336,
+        "y": 520.48
+      }
+    ],
+    "obstacles": [],
+    "surfaces": [],
+    "movers": [
+      {
+        "x": 440.03224,
+        "y": 452.23431999999997,
+        "w": 47.53104000000003,
+        "h": 160,
+        "travel": 89,
+        "period": 8
+      }
+    ]
+  }
+}

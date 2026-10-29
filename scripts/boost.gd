@@ -32,3 +32,6 @@ func _draw():
 		var at = Vector2(x,0)
 		var points = PackedVector2Array([at-axis*4-normal*4,at+axis*4,at-axis*4+normal*4])
 		draw_polyline(points,Color("f2ffd7"),2.5,true)
+
+func activate():
+	feedback("boost")

@@ -1,0 +1,68 @@
+{
+  "format": "goal-in-one-level",
+  "version": 1,
+  "draftId": "comparison-L10",
+  "modified": "2026-10-29T00:00:00Z",
+  "difficulty": 2,
+  "tags": [
+    "comparison"
+  ],
+  "level": {
+    "id": 10,
+    "name": "The red line",
+    "tip": "Touching the red strip returns the ball to its start. Every kick already taken still counts.",
+    "par": 1,
+    "starShots": [
+      1,
+      3
+    ],
+    "width": 1280,
+    "start": {
+      "x": 112,
+      "y": 606.13632
+    },
+    "goal": {
+      "x": 1091.0176,
+      "y": 628.13632,
+      "w": 135.48640000000015,
+      "h": 107.65631999999997,
+      "roof": 79.53760000000003
+    },
+    "outline": [
+      {
+        "x": 57.50864,
+        "y": 628.13632
+      },
+      {
+        "x": 57.50864,
+        "y": 409.12
+      },
+      {
+        "x": 164,
+        "y": 302.20688
+      },
+      {
+        "x": 983.2,
+        "y": 302.20688
+      },
+      {
+        "x": 1092.32336,
+        "y": 410.72
+      },
+      {
+        "x": 1092.32336,
+        "y": 520.48
+      }
+    ],
+    "obstacles": [],
+    "surfaces": [
+      {
+        "x": 470.99136,
+        "y": 628.13632,
+        "w": 208.16128,
+        "kind": "delete"
+      }
+    ],
+    "movers": []
+  }
+}

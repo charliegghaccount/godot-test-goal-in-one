@@ -1,0 +1,96 @@
+{
+  "format": "goal-in-one-level",
+  "version": 1,
+  "draftId": "comparison-L13",
+  "modified": "2026-10-29T00:00:00Z",
+  "difficulty": 2,
+  "tags": [
+    "comparison"
+  ],
+  "level": {
+    "id": 13,
+    "name": "Under and over",
+    "tip": "A ceiling baffle leaves a generous low route; bank shots can work too.",
+    "par": 1,
+    "starShots": [
+      1,
+      3
+    ],
+    "width": 1280,
+    "start": {
+      "x": 112,
+      "y": 606.13632
+    },
+    "goal": {
+      "x": 1091.0176,
+      "y": 628.13632,
+      "w": 135.48640000000015,
+      "h": 107.65631999999997,
+      "roof": 79.53760000000003
+    },
+    "outline": [
+      {
+        "x": 57.50864,
+        "y": 628.13632
+      },
+      {
+        "x": 57.50864,
+        "y": 409.12
+      },
+      {
+        "x": 164,
+        "y": 302.20688
+      },
+      {
+        "x": 643.408,
+        "y": 92.976
+      },
+      {
+        "x": 1092.32336,
+        "y": 520.48
+      }
+    ],
+    "obstacles": [
+      {
+        "id": "extra-2-0",
+        "points": [
+          {
+            "x": 484,
+            "y": 156
+          },
+          {
+            "x": 580,
+            "y": 114.4
+          },
+          {
+            "x": 580,
+            "y": 341.6
+          },
+          {
+            "x": 484,
+            "y": 341.6
+          }
+        ]
+      },
+      {
+        "id": "extra-2-1",
+        "points": [
+          {
+            "x": 676,
+            "y": 628
+          },
+          {
+            "x": 820,
+            "y": 544.8
+          },
+          {
+            "x": 820,
+            "y": 628
+          }
+        ]
+      }
+    ],
+    "surfaces": [],
+    "movers": []
+  }
+}

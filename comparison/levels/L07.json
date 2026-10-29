@@ -1,0 +1,88 @@
+{
+  "format": "goal-in-one-level",
+  "version": 1,
+  "draftId": "comparison-L07",
+  "modified": "2026-10-29T00:00:00Z",
+  "difficulty": 2,
+  "tags": [
+    "comparison"
+  ],
+  "level": {
+    "id": 7,
+    "name": "Double trouble",
+    "tip": "Two triangles face each other beneath a low roof. Keep control through the middle.",
+    "par": 1,
+    "starShots": [
+      1,
+      3
+    ],
+    "width": 1280,
+    "start": {
+      "x": 112,
+      "y": 606.13632
+    },
+    "goal": {
+      "x": 1091.0176,
+      "y": 628.13632,
+      "w": 135.48640000000015,
+      "h": 107.65631999999997,
+      "roof": 79.53760000000003
+    },
+    "outline": [
+      {
+        "x": 57.50864,
+        "y": 628.13632
+      },
+      {
+        "x": 57.50864,
+        "y": 412.24111999999997
+      },
+      {
+        "x": 990.77568,
+        "y": 412.24111999999997
+      },
+      {
+        "x": 1092.32336,
+        "y": 520.48
+      }
+    ],
+    "obstacles": [
+      {
+        "id": "left-triangle",
+        "points": [
+          {
+            "x": 282.48352,
+            "y": 628.13632
+          },
+          {
+            "x": 523.37472,
+            "y": 559.5784
+          },
+          {
+            "x": 523.37472,
+            "y": 628.13632
+          }
+        ]
+      },
+      {
+        "id": "right-triangle",
+        "points": [
+          {
+            "x": 624.39792,
+            "y": 559.5784
+          },
+          {
+            "x": 624.39792,
+            "y": 628.13632
+          },
+          {
+            "x": 865.28912,
+            "y": 628.13632
+          }
+        ]
+      }
+    ],
+    "surfaces": [],
+    "movers": []
+  }
+}

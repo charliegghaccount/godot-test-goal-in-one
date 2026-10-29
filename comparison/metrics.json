@@ -1,0 +1,233 @@
+[
+  {
+    "case": "a-15-p40",
+    "matter": {
+      "x_1s": 276.99,
+      "rise": 2.41,
+      "landing_s": 0.642,
+      "rebound_speed": 515.65,
+      "rebound_angle": -58.01,
+      "distance_10s": 787.11,
+      "rest_s": 3.74
+    },
+    "godot": {
+      "x_1s": 275.56,
+      "rise": 2.41,
+      "landing_s": 0.65,
+      "rebound_speed": 543.85,
+      "rebound_angle": -60.37,
+      "distance_10s": 1083.87,
+      "rest_s": 5.93
+    }
+  },
+  {
+    "case": "a-15-p90",
+    "matter": {
+      "x_1s": 623.37,
+      "rise": 13.37,
+      "landing_s": 0.75,
+      "rebound_speed": 759.61,
+      "rebound_angle": -36.72,
+      "distance_10s": 2538.65,
+      "rest_s": 5.82
+    },
+    "godot": {
+      "x_1s": 617.28,
+      "rise": 13.01,
+      "landing_s": 0.758,
+      "rebound_speed": 774.07,
+      "rebound_angle": -38.64,
+      "distance_10s": 3173.37,
+      "rest_s": 8.31
+    }
+  },
+  {
+    "case": "a-15-p140",
+    "matter": {
+      "x_1s": 969.79,
+      "rise": 32.7,
+      "landing_s": 0.867,
+      "rebound_speed": 1052.81,
+      "rebound_angle": -27.08,
+      "distance_10s": 5094.32,
+      "rest_s": 8.19
+    },
+    "godot": {
+      "x_1s": 961.33,
+      "rise": 31.94,
+      "landing_s": 0.875,
+      "rebound_speed": 1062.15,
+      "rebound_angle": -28.49,
+      "distance_10s": 6088.07,
+      "rest_s": null
+    }
+  },
+  {
+    "case": "a-40-p40",
+    "matter": {
+      "x_1s": 219.68,
+      "rise": 15.92,
+      "landing_s": 0.767,
+      "rebound_speed": 526.52,
+      "rebound_angle": -65.99,
+      "distance_10s": 713.56,
+      "rest_s": 4.17
+    },
+    "godot": {
+      "x_1s": 217.17,
+      "rise": 15.92,
+      "landing_s": 0.783,
+      "rebound_speed": 532.8,
+      "rebound_angle": -66.72,
+      "distance_10s": 900.54,
+      "rest_s": 6.11
+    }
+  },
+  {
+    "case": "a-40-p90",
+    "matter": {
+      "x_1s": 494.4,
+      "rise": 82.68,
+      "landing_s": 1.075,
+      "rebound_speed": 714.37,
+      "rebound_angle": -48.97,
+      "distance_10s": 2062.69,
+      "rest_s": 5.62
+    },
+    "godot": {
+      "x_1s": 490.36,
+      "rise": 81.77,
+      "landing_s": 1.092,
+      "rebound_speed": 730.85,
+      "rebound_angle": -50.54,
+      "distance_10s": 2450.6,
+      "rest_s": 7.78
+    }
+  },
+  {
+    "case": "a-40-p140",
+    "matter": {
+      "x_1s": 769.07,
+      "rise": 198.42,
+      "landing_s": 1.433,
+      "rebound_speed": 941.78,
+      "rebound_angle": -41.4,
+      "distance_10s": 3940.92,
+      "rest_s": 7.59
+    },
+    "godot": {
+      "x_1s": 762.79,
+      "rise": 196.86,
+      "landing_s": 1.442,
+      "rebound_speed": 972.83,
+      "rebound_angle": -43.83,
+      "distance_10s": 4772.0,
+      "rest_s": null
+    }
+  },
+  {
+    "case": "a-70-p40",
+    "matter": {
+      "x_1s": 98.08,
+      "rise": 34.4,
+      "landing_s": 0.875,
+      "rebound_speed": 487.87,
+      "rebound_angle": -78.81,
+      "distance_10s": 294.16,
+      "rest_s": 3.56
+    },
+    "godot": {
+      "x_1s": 96.84,
+      "rise": 34.4,
+      "landing_s": 0.892,
+      "rebound_speed": 520.26,
+      "rebound_angle": -79.99,
+      "distance_10s": 192.95,
+      "rest_s": 3.55
+    }
+  },
+  {
+    "case": "a-70-p90",
+    "matter": {
+      "x_1s": 220.7,
+      "rise": 174.6,
+      "landing_s": 1.367,
+      "rebound_speed": 678.62,
+      "rebound_angle": -72.52,
+      "distance_10s": 923.8,
+      "rest_s": 5.35
+    },
+    "godot": {
+      "x_1s": 218.93,
+      "rise": 174.09,
+      "landing_s": 1.383,
+      "rebound_speed": 685.24,
+      "rebound_angle": -73.14,
+      "distance_10s": 1006.35,
+      "rest_s": 7.47
+    }
+  },
+  {
+    "case": "a-70-p140",
+    "matter": {
+      "x_1s": 343.34,
+      "rise": 417.39,
+      "landing_s": 1.917,
+      "rebound_speed": 844.61,
+      "rebound_angle": -69.05,
+      "distance_10s": 1767.35,
+      "rest_s": 6.98
+    },
+    "godot": {
+      "x_1s": 340.57,
+      "rise": 415.79,
+      "landing_s": 1.925,
+      "rebound_speed": 891.85,
+      "rebound_angle": -70.59,
+      "distance_10s": 2053.18,
+      "rest_s": 9.53
+    }
+  },
+  {
+    "case": "correction",
+    "matter": {
+      "x_1s": 262.55,
+      "rise": 198.42,
+      "landing_s": 1.208,
+      "rebound_speed": 838.88,
+      "rebound_angle": -126.49,
+      "distance_10s": -1783.97,
+      "rest_s": 6.66
+    },
+    "godot": {
+      "x_1s": 255.62,
+      "rise": 196.86,
+      "landing_s": 1.217,
+      "rebound_speed": 860.43,
+      "rebound_angle": -125.11,
+      "distance_10s": -2084.59,
+      "rest_s": 8.43
+    }
+  },
+  {
+    "case": "rolling",
+    "matter": {
+      "x_1s": 376.85,
+      "rise": -0.03,
+      "landing_s": 0.025,
+      "rebound_speed": 0.0,
+      "rebound_angle": 0.0,
+      "distance_10s": 617.34,
+      "rest_s": 2.37
+    },
+    "godot": {
+      "x_1s": 379.99,
+      "rise": 1.47,
+      "landing_s": 0.017,
+      "rebound_speed": 0.0,
+      "rebound_angle": 0.0,
+      "distance_10s": 820.1,
+      "rest_s": 3.84
+    }
+  }
+]

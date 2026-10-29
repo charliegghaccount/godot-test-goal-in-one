@@ -44,7 +44,7 @@ func run():
 		game.shots = 1
 		PhysicsServer2D.body_set_state(game.ball.get_rid(),PhysicsServer2D.BODY_STATE_TRANSFORM,Transform2D(0,level.get_node("Goal").position+Vector2(-35,-55)))
 		game.ball.linear_velocity = Vector2(400,0)
-		for i in range(25): await physics_frame
+		for i in range(115): await physics_frame
 		check(game.won,"imported goal detects real native crossing")
 		var after = FileAccess.get_file_as_string("user://progress.cfg") if FileAccess.file_exists("user://progress.cfg") else ""
 		check(before==after,"Godot preview does not write progression")

@@ -1,6 +1,8 @@
-# Goal In One — Godot V4
+# Goal In One — Godot V5
 
 Native Godot 4 / GDScript football puzzle prototype with a visual level-authoring foundation. Standard Godot **4.6.3** is tested and pinned in the web workflow; no .NET or application secrets are needed.
+
+**V5 comparison:** the runtime opens canonical level 1; use its picker for the original **levels 1–20**. Goal collisions/scoring, damping, seam protection, moving timbers, background framing and approved announcer audio have been updated. Read the [parity report](docs/V5_PARITY.md) for measurements and remaining differences.
 
 **Primary level-design workflow:** use the original [Web Level Studio](https://charliegghaccount.github.io/goal-in-one-test/) and its **Test in Godot** button. See [the integration guide](docs/WEB_STUDIO.md). Native scene editing remains optional.
 

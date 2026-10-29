@@ -27,6 +27,9 @@ jobs:
           godot --headless --script res://tests/runtime.gd
           godot --headless --script res://tests/mechanics.gd
           godot --headless --script res://tests/import.gd
+          godot --headless --script res://tests/goal_physics.gd
+          godot --headless --script res://tests/comparison_levels.gd
+          godot --headless --script res://tests/collisions.gd
       - name: Export single-threaded WebGL2
         run: |
           mkdir -p build/web
