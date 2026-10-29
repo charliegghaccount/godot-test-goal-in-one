@@ -3,6 +3,9 @@ var net_capture = false
 signal hit
 signal kicked
 var hit_cooldown = 0.0
+var support_remaining = 0.0
+var support_normal = Vector2.UP
+var support_velocity = Vector2.ZERO
 
 func _ready():
 	# Layer 1 is solid architecture; layer 2 identifies the football for sensors.
@@ -43,6 +46,7 @@ func kick(pull: Vector2):
 	if pull.length() < 6:
 		return false
 	sleeping = false
+	support_remaining = 0.0
 	linear_velocity = shot_velocity(pull)
 	angular_velocity = clampf(angular_velocity * 0.2 - pull.limit_length(140).x * 0.03, -21, 21)
 	kicked.emit()
@@ -55,12 +59,25 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 			hit.emit.call_deferred()
 			hit_cooldown = 0.09
 	if not net_capture:
-		physics_material_override.bounce = 0.76
-		physics_material_override.friction = 0.003
+		support_remaining = maxf(0,support_remaining-state.step)
 		for i in state.get_contact_count():
-			if absf(state.linear_velocity.dot(state.get_contact_local_normal(i)))<60:
-				physics_material_override.bounce = 0.0
-				physics_material_override.friction = 0.35 if absf(state.linear_velocity.x)<300 else 0.04
+			var normal = state.get_contact_local_normal(i)
+			var surface_velocity = state.get_contact_collider_velocity_at_position(i)
+			if normal.y < -0.65 and absf((state.linear_velocity-surface_velocity).dot(normal)) < 60:
+				support_normal = normal
+				support_velocity = surface_velocity
+				support_remaining = 0.08
+		var relative = state.linear_velocity-support_velocity
+		var supported = support_remaining > 0 and absf(relative.dot(support_normal)) < 60
+		physics_material_override.bounce = 0.0 if supported else 0.76
+		physics_material_override.friction = (0.35 if absf(relative.x)<320 else 0.04) if supported else 0.003
+		# Suppress the long low-speed tail without changing flight or high-speed shots.
+		# Brief support hysteresis avoids re-enabling bounce between resting contacts.
+		if supported:
+			var tangent = Vector2(-support_normal.y,support_normal.x)
+			var speed = relative.dot(tangent)
+			if absf(speed) < 320:
+				state.linear_velocity += tangent*(move_toward(speed,0,110*state.step)-speed)
 	if net_capture:
 		state.linear_velocity *= Vector2(pow(0.95,state.step*120),pow(0.97,state.step*120))
 		physics_material_override.bounce = 0.08

@@ -1,12 +1,12 @@
 config_version=5
 [application]
 config/name="Goal In One • Godot"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720
-window/stretch/mode="canvas_items"
+window/stretch/mode="disabled"
 window/handheld/orientation=0
 [rendering]
 renderer/rendering_method="gl_compatibility"

@@ -1,8 +1,8 @@
-# Goal In One — Godot V5
+# Goal In One — Godot V6
 
 Native Godot 4 / GDScript football puzzle prototype with a visual level-authoring foundation. Standard Godot **4.6.3** is tested and pinned in the web workflow; no .NET or application secrets are needed.
 
-**V5 comparison:** the runtime opens canonical level 1; use its picker for the original **levels 1–20**. Goal collisions/scoring, damping, seam protection, moving timbers, background framing and approved announcer audio have been updated. Read the [parity report](docs/V5_PARITY.md) for measurements and remaining differences.
+**V6 game flow:** the runtime opens the main menu. PLAY resumes the first unfinished official course; LEVEL SELECT shows the original **levels 1–20**, stars and unavailable future slots. See [V6 flow and validation](docs/V6_GAME_FLOW.md). Goal collisions/scoring, damping, seam protection, moving timbers, background framing have been updated. V6 restores the approved announcer lines and adds the complete native menu, campaign selection and compact HUD. Read the [parity report](docs/V5_PARITY.md) for measurements and remaining differences.
 
 **Primary level-design workflow:** use the original [Web Level Studio](https://charliegghaccount.github.io/goal-in-one-test/) and its **Test in Godot** button. See [the integration guide](docs/WEB_STUDIO.md). Native scene editing remains optional.
 
@@ -29,6 +29,9 @@ godot --headless --editor --import --quit
 godot --headless --script res://tests/runtime.gd
 godot --headless --script res://tests/mechanics.gd
 godot --headless --script res://tests/import.gd
+godot --headless --script res://tests/progression.gd
+godot --headless --script res://tests/rolling.gd
+godot --headless --script res://tests/game_flow.gd
 mkdir -p build/web
 godot --headless --export-release Web build/web/index.html
 python3 -m http.server 8000 --directory build/web

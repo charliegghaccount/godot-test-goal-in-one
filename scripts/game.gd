@@ -22,6 +22,18 @@ var rating_view: Control
 var panel: PanelContainer
 var camera: Camera2D
 var best = 0
+var best_stars = 0
+var progress_path = "user://progress.cfg"
+var flow: Node
+var campaign = preload("res://scripts/campaign.gd").new()
+var tools_panel: PanelContainer
+var modal_root: Control
+var mute_button: Button
+var primary_action: Button
+var replay_action: Button
+var selection_action: Button
+var level_selection: PanelContainer
+var transition_pending = false
 var studio_test = false
 const FLOOR = 628.13632
 
@@ -40,6 +52,7 @@ func _ready():
 	if StudioBridge.active and not studio_test:
 		StudioBridge.waiting(self)
 		return
+	campaign.progress_path = progress_path
 	level_paths = discover_levels()
 	if is_instance_valid(level_override):
 		level = level_override
@@ -48,7 +61,8 @@ func _ready():
 		active_path = get_meta("level_path", active_path)
 		if OS.has_feature("web") and not has_meta("level_path"):
 			var requested = str(JavaScriptBridge.eval("new URLSearchParams(location.search).get('level') || ''"))
-			if requested.is_valid_int() and int(requested)>=1 and int(requested)<=20: active_path="res://comparison/levels/L%02d.json"%int(requested)
+			var requested_path = "res://comparison/levels/L%02d.json"%int(requested) if requested.is_valid_int() else ""
+			if requested_path in level_paths: active_path = requested_path
 		if active_path.ends_with(".json"):
 			var result = preload("res://scripts/studio_import.gd").new().parse(FileAccess.get_file_as_string(active_path))
 			if not result.errors.is_empty(): push_error(str(result.errors)); return
@@ -61,7 +75,9 @@ func _ready():
 		return
 	spawn_point = level.get_node("Spawn").global_position
 	var save = ConfigFile.new()
-	if not studio_test and save.load("user://progress.cfg") == OK: best = save.get_value(level.level_id,"best",0)
+	if not studio_test and save.load(progress_path) == OK:
+		best = save.get_value(level.level_id,"best",0)
+		best_stars = campaign.rating(best,level.star_shots)
 	camera = Camera2D.new()
 	add_child(camera)
 	ball = BALL.instantiate()
@@ -77,9 +93,11 @@ func _ready():
 			if object.get_script() == preload("res://scripts/boost.gd"): boost = object
 	sound = preload("res://scripts/game_audio.gd").new()
 	add_child(sound)
+	sound.muted = not campaign.sound_enabled()
 	ball.hit.connect(func(): mechanic_feedback("hit",ball.position))
 	ball.kicked.connect(func(): mechanic_feedback("shot",ball.position))
 	build_hud()
+
 	frame_camera()
 	var backdrop = CanvasLayer.new()
 	backdrop.layer = -10
@@ -94,17 +112,28 @@ func discover_levels() -> PackedStringArray:
 	var paths = PackedStringArray()
 	for filename in ResourceLoader.list_directory("res://levels"):
 		if filename.ends_with(".tscn"): paths.append("res://levels/"+filename)
-	paths.sort()
+	paths = natural_order(paths)
 	var comparison = PackedStringArray()
 	for filename in ResourceLoader.list_directory("res://comparison/levels"):
 		if filename.ends_with(".json"): comparison.append("res://comparison/levels/"+filename)
-	comparison.sort()
+	comparison = natural_order(comparison)
 	return comparison+paths
 
+func natural_order(paths: PackedStringArray) -> PackedStringArray:
+	var ordered = Array(paths)
+	ordered.sort_custom(func(a,b): return a.naturalnocasecmp_to(b) < 0)
+	return PackedStringArray(ordered)
+
 func load_level(path: String):
+	if transition_pending or not path in level_paths: return
+	transition_pending = true
 	var next = load("res://scenes/main.tscn").instantiate()
 	next.set_meta("level_path",path)
-	get_tree().root.add_child(next)
+	next.studio_test = studio_test
+	next.progress_path = progress_path
+	next.flow = flow
+	if is_instance_valid(flow): flow.game = next
+	get_parent().add_child(next)
 	if is_instance_valid(level_override): level_override.queue_free()
 	queue_free()
 
@@ -151,94 +180,58 @@ func toggle_explore():
 	if not exploring: frame_camera()
 	queue_redraw()
 
-func wood_style() -> StyleBoxTexture:
-	var style = StyleBoxTexture.new()
-	style.texture = preload("res://assets/wood.webp")
-	style.set_content_margin_all(12)
-	return style
-
-func button(text: String, action: Callable) -> Button:
-	var b = Button.new()
-	b.text = text
-	b.custom_minimum_size = Vector2(90,48)
-	b.add_theme_font_size_override("font_size",20)
-	b.add_theme_stylebox_override("normal",wood_style())
-	b.add_theme_color_override("font_color",Color("fff1cf"))
-	b.pressed.connect(action)
-	return b
-
 func build_hud():
-	var layer = CanvasLayer.new()
-	add_child(layer)
-	var top = PanelContainer.new()
-	top.position = Vector2(24,18)
-	top.size = Vector2(1232,70)
-	top.add_theme_stylebox_override("panel",wood_style())
-	layer.add_child(top)
-	var row = HBoxContainer.new()
-	row.add_theme_constant_override("separation",10)
-	top.add_child(row)
-	hud = Label.new()
-	hud.clip_text = true
-	hud.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hud.add_theme_font_size_override("font_size",19)
-	hud.add_theme_color_override("font_color",Color("fff3cf"))
-	row.add_child(hud)
-	if studio_test: row.add_child(button("Return",StudioBridge.return_to_editor))
-	row.add_child(button("Restart",restart))
-	row.add_child(button("Pause",toggle_pause))
-	var mute = button("Mute",func(): sound.toggle())
-	mute.pressed.connect(func(): mute.text="Sound off" if sound.muted else "Mute")
-	row.add_child(mute)
-	row.add_child(button("Reset ball",reset_ball))
-	explore_button = button("Explore",toggle_explore)
-	row.add_child(explore_button)
-	level_picker = OptionButton.new()
-	level_picker.custom_minimum_size = Vector2(190,42)
-	level_picker.fit_to_longest_item = false
-	level_picker.clip_text = true
-	level_picker.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	level_picker.position = Vector2(24,660)
-	for path in level_paths:
-		level_picker.add_item(path.get_file().get_basename().capitalize())
-		if path == active_path: level_picker.select(level_picker.item_count-1)
-	level_picker.item_selected.connect(func(index): load_level(level_paths[index]))
-	layer.add_child(level_picker)
-	level_picker.visible = not studio_test
-	var tip = Label.new()
-	controls_hint = tip
-	tip.text = "Drag anywhere to kick • Explore: drag to pan / wheel to zoom • R restart"
-	tip.position = Vector2(235,668)
-	tip.add_theme_font_size_override("font_size",19)
-	tip.add_theme_color_override("font_color",Color("fff5dc"))
-	tip.add_theme_color_override("font_shadow_color",Color("26422b"))
-	tip.add_theme_constant_override("shadow_offset_y",2)
-	layer.add_child(tip)
-	panel = PanelContainer.new()
-	panel.position = Vector2(390,225)
-	panel.size = Vector2(500,230)
-	panel.add_theme_stylebox_override("panel",wood_style())
-	layer.add_child(panel)
-	var column = VBoxContainer.new()
-	column.alignment = BoxContainer.ALIGNMENT_CENTER
-	panel.add_child(column)
-	message = Label.new()
-	message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	message.add_theme_font_size_override("font_size",30)
-	column.add_child(message)
-	rating_view = preload("res://scripts/rating_stars.gd").new()
-	rating_view.custom_minimum_size = Vector2(0,55)
-	column.add_child(rating_view)
-	column.add_child(button("Continue / Play again",func():
-		if won: restart()
-		else: toggle_pause()))
-	panel.hide()
+	preload("res://scripts/ui/game_hud.gd").build(self)
+
+func next_level_path() -> String:
+	return "" if studio_test else campaign.next_path(active_path)
+
+func primary_pressed():
+	if not won: toggle_pause()
+	elif studio_test: StudioBridge.return_to_editor()
+	elif next_level_path().is_empty(): back_to_levels()
+	else: load_level(next_level_path())
+
+func back_to_levels():
+	if studio_test:
+		StudioBridge.return_to_editor()
+		return
+	if is_instance_valid(level_override): level_override.queue_free()
+	if is_instance_valid(flow): flow.open_levels(active_path)
+	else:
+		var menu = load("res://scenes/menu.tscn").instantiate()
+		menu.progress_path = progress_path
+		get_parent().add_child(menu)
+		menu.open_levels(active_path)
+		queue_free()
+
+func toggle_sound():
+	sound.toggle()
+	if not studio_test: campaign.set_sound(not sound.muted)
+	mute_button.text = "OFF" if sound.muted else "SND"
+
+func toggle_tools():
+	tools_panel.visible = not tools_panel.visible
+	aiming = false
+
+func return_to_ball():
+	exploring = false
+	camera_drag = false
+	frame_camera()
+	explore_button.text = "EXPLORE / PAN"
+	tools_panel.hide()
+
+func zoom_camera(factor: float):
+	exploring = true
+	camera.zoom = (camera.zoom*factor).clamp(Vector2(0.3,0.3),Vector2(2,2))
+	explore_button.text = "RETURN TO AIM"
 
 func refresh():
-	hud.text = "%s   •   SHOTS %d   /   PAR %d   /   BEST %s" % [level.level_name,shots,level.par,str(best) if best else "—"]
+	hud.text = "SHOTS %d  /  PAR %d" % [shots,level.par]
+	mute_button.text = "OFF" if sound.muted else "SND"
 
 func restart():
-	if studio_test:
+	if studio_test and not StudioBridge.last_json.is_empty():
 		StudioBridge.receive([StudioBridge.last_json])
 		return
 	load_level(active_path)
@@ -255,6 +248,10 @@ func toggle_pause():
 	message.text = "HALF TIME
 Ready for another shot?"
 	rating_view.visible = false
+	primary_action.text = "RESUME"
+	replay_action.show()
+	selection_action.show()
+	tools_panel.hide()
 	panel.visible = paused
 	queue_redraw()
 
@@ -282,15 +279,25 @@ func complete():
 	aiming = false
 	var stars = 3 if shots <= level.star_shots.x else (2 if shots <= level.star_shots.y else 1)
 	best = shots if best == 0 else mini(best,shots)
-	var save = ConfigFile.new()
-	save.set_value(level.level_id,"best",best)
-	if not studio_test: save.save("user://progress.cfg")
-	message.text = ("GOAL IN ONE!   " if shots==1 else "GOAL!   ") + "
-%d %s  •  Par %d" % [shots,"shot" if shots==1 else "shots",level.par]
+	best_stars = campaign.rating(best,level.star_shots)
+	if not studio_test:
+		var error = campaign.record(level.level_id,shots,level.star_shots)
+		if error!=OK: push_warning("Progress could not be saved: "+error_string(error))
+	var heading = "GOAL IN ONE!" if shots==1 else ("GREAT GOAL!" if stars==3 else ("NICE FINISH!" if stars==2 else "LEVEL COMPLETE!"))
+	message.text = "%s\nSHOTS %d  •  PAR %d"%[heading,shots,level.par]
 	rating_view.visible = true
 	rating_view.count = stars
 	rating_view.queue_redraw()
+	primary_action.text = "RETURN TO EDITOR" if studio_test else ("NEXT LEVEL" if not next_level_path().is_empty() else "ALL LEVELS")
+	if next_level_path().is_empty() and not studio_test and campaign.index_of(active_path)>=0:
+		message.text += "\nAll levels complete!"
+	replay_action.show()
+	selection_action.visible = not studio_test
 	panel.show()
+	tools_panel.hide()
+	var reveal = create_tween()
+	rating_view.modulate.a = 0.0
+	reveal.tween_property(rating_view,"modulate:a",1.0,0.25)
 	sound.announce(shots,level.par,level.star_shots)
 	refresh()
 	queue_redraw()
@@ -324,6 +331,7 @@ func _unhandled_input(event):
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
+			tools_panel.hide()
 			aiming = true
 			drag_start = event.position
 			pull = Vector2.ZERO

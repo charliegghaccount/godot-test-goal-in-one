@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "levels": [
+    "res://comparison/levels/L01.json",
+    "res://comparison/levels/L02.json",
+    "res://comparison/levels/L03.json",
+    "res://comparison/levels/L04.json",
+    "res://comparison/levels/L05.json",
+    "res://comparison/levels/L06.json",
+    "res://comparison/levels/L07.json",
+    "res://comparison/levels/L08.json",
+    "res://comparison/levels/L09.json",
+    "res://comparison/levels/L10.json",
+    "res://comparison/levels/L11.json",
+    "res://comparison/levels/L12.json",
+    "res://comparison/levels/L13.json",
+    "res://comparison/levels/L14.json",
+    "res://comparison/levels/L15.json",
+    "res://comparison/levels/L16.json",
+    "res://comparison/levels/L17.json",
+    "res://comparison/levels/L18.json",
+    "res://comparison/levels/L19.json",
+    "res://comparison/levels/L20.json"
+  ]
+}

@@ -16,8 +16,8 @@
       "landing_s": 0.65,
       "rebound_speed": 543.85,
       "rebound_angle": -60.37,
-      "distance_10s": 1083.87,
-      "rest_s": 5.93
+      "distance_10s": 978.95,
+      "rest_s": 4.66
     }
   },
   {
@@ -37,8 +37,8 @@
       "landing_s": 0.758,
       "rebound_speed": 774.07,
       "rebound_angle": -38.64,
-      "distance_10s": 3173.37,
-      "rest_s": 8.31
+      "distance_10s": 2874.29,
+      "rest_s": 6.64
     }
   },
   {
@@ -58,8 +58,8 @@
       "landing_s": 0.875,
       "rebound_speed": 1062.15,
       "rebound_angle": -28.49,
-      "distance_10s": 6088.07,
-      "rest_s": null
+      "distance_10s": 5717.54,
+      "rest_s": 9.47
     }
   },
   {
@@ -79,8 +79,8 @@
       "landing_s": 0.783,
       "rebound_speed": 532.8,
       "rebound_angle": -66.72,
-      "distance_10s": 900.54,
-      "rest_s": 6.11
+      "distance_10s": 809.42,
+      "rest_s": 4.82
     }
   },
   {
@@ -100,8 +100,8 @@
       "landing_s": 1.092,
       "rebound_speed": 730.85,
       "rebound_angle": -50.54,
-      "distance_10s": 2450.6,
-      "rest_s": 7.78
+      "distance_10s": 2191.66,
+      "rest_s": 6.12
     }
   },
   {
@@ -121,8 +121,8 @@
       "landing_s": 1.442,
       "rebound_speed": 972.83,
       "rebound_angle": -43.83,
-      "distance_10s": 4772.0,
-      "rest_s": null
+      "distance_10s": 4499.82,
+      "rest_s": 8.85
     }
   },
   {
@@ -142,7 +142,7 @@
       "landing_s": 0.892,
       "rebound_speed": 520.26,
       "rebound_angle": -79.99,
-      "distance_10s": 192.95,
+      "distance_10s": 191.15,
       "rest_s": 3.55
     }
   },
@@ -163,8 +163,8 @@
       "landing_s": 1.383,
       "rebound_speed": 685.24,
       "rebound_angle": -73.14,
-      "distance_10s": 1006.35,
-      "rest_s": 7.47
+      "distance_10s": 950.18,
+      "rest_s": 6.33
     }
   },
   {
@@ -184,8 +184,8 @@
       "landing_s": 1.925,
       "rebound_speed": 891.85,
       "rebound_angle": -70.59,
-      "distance_10s": 2053.18,
-      "rest_s": 9.53
+      "distance_10s": 1975.85,
+      "rest_s": 8.38
     }
   },
   {
@@ -205,8 +205,8 @@
       "landing_s": 1.217,
       "rebound_speed": 860.43,
       "rebound_angle": -125.11,
-      "distance_10s": -2084.59,
-      "rest_s": 8.43
+      "distance_10s": -1924.73,
+      "rest_s": 7.1
     }
   },
   {
@@ -221,13 +221,13 @@
       "rest_s": 2.37
     },
     "godot": {
-      "x_1s": 379.99,
-      "rise": 1.47,
+      "x_1s": 376.65,
+      "rise": 0.08,
       "landing_s": 0.017,
       "rebound_speed": 0.0,
       "rebound_angle": 0.0,
-      "distance_10s": 820.1,
-      "rest_s": 3.84
+      "distance_10s": 597.73,
+      "rest_s": 2.36
     }
   }
 ]

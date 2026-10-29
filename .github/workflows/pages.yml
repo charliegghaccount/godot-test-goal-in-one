@@ -30,6 +30,9 @@ jobs:
           godot --headless --script res://tests/goal_physics.gd
           godot --headless --script res://tests/comparison_levels.gd
           godot --headless --script res://tests/collisions.gd
+          godot --headless --script res://tests/progression.gd
+          godot --headless --script res://tests/rolling.gd
+          godot --headless --script res://tests/game_flow.gd
       - name: Export single-threaded WebGL2
         run: |
           mkdir -p build/web

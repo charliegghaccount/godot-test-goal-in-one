@@ -1,5 +1,7 @@
 extends Node
 var muted = false
+# V6 preserves the approved recordings and original selection rules.
+var announcements_enabled = true
 var voice: AudioStreamPlayer
 var last_effect = {}
 static func announcement_for(shots: int, par: int, thresholds: Vector2i) -> String:
@@ -21,7 +23,7 @@ func toggle():
 func announce(shots: int, par: int, thresholds: Vector2i):
 	voice.stop()
 	var name = announcement_for(shots,par,thresholds)
-	if muted or name.is_empty() or DisplayServer.get_name()=="headless": return
+	if not announcements_enabled or muted or name.is_empty() or DisplayServer.get_name()=="headless": return
 	voice.stream = load("res://assets/announcer/"+name+".mp3")
 	voice.play()
 func effect(kind: String):
